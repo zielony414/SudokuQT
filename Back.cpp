@@ -30,7 +30,6 @@ void back::DrawNumber(int count)
 
 }
 
-
 int back::Show()
 {
     for (int i = 0; i < 9; ++i) {
@@ -103,19 +102,169 @@ void back::Insert(int row, int col, int num)
     Board[row][col] = num;
 }
 
+void back::Delete(int row, int col)
+{
+    Board[row][col] = 0;
+}
+
 int back::Retrive(int row, int col)
 {
     return Board[row][col];
+}
+
+bool back::IsDeletable(int x, int y)
+{
+    int numer = Board[x][y];
+    switch(numer){
+    case 1:
+        if (Liczba1 > 1) {
+            Liczba1--;
+            return true;
+        }
+        else {
+            return false;
+        }
+        break;
+    case 2:
+        if (Liczba2 > 1) {
+            Liczba2--;
+            return true;
+        }
+        else {
+            return false;
+        }
+        break;
+    case 3:
+        if (Liczba3 > 1) {
+            Liczba3--;
+            return true;
+        }
+        else {
+            return false;
+        }
+        break;
+    case 4:
+        if (Liczba4 > 1) {
+            Liczba4--;
+            return true;
+        }
+        else {
+            return false;
+        }
+        break;
+    case 5:
+        if (Liczba5 > 1) {
+            Liczba5--;
+            return true;
+        }
+        else {
+            return false;
+        }
+        break;
+    case 6:
+        if (Liczba6 > 1) {
+            Liczba6--;
+            return true;
+        }
+        else {
+            return false;
+        }
+        break;
+    case 7:
+        if (Liczba7 > 1) {
+            Liczba7--;
+            return true;
+        }
+        else {
+            return false;
+        }
+        break;
+    case 8:
+        if (Liczba8 > 1) {
+            Liczba8--;
+            return true;
+        }
+        else {
+            return false;
+        }
+        break;
+    case 9:
+        if (Liczba9 > 1) {
+            Liczba9--;
+            return true;
+        }
+        else {
+            return false;
+        }
+        break;
+    }
 }
 
 int(&back::GetTable())[9][9]{
     return Board;
 }
 
+int back::Play(int poziomTrud)
+{
+    srand(time(NULL));
 
-// funkcja rozwiazujaca sudoku
-/*pobiera macierz po czym stara sie przypisac wartosci
-komorkom majacym wartosc 0 zgodnie z zasadami gry*/
+
+    int NumberOfDeletes;
+    int i;
+    Clear();
+    DrawNumber(5);
+    SudokuSolver();
+
+    switch (poziomTrud) {
+    case 1:
+        i = 20;
+        NumberOfDeletes = 20;
+        break;
+    case 2:
+        i = 40;
+        NumberOfDeletes = 40;
+        break;
+    case 3:
+        i = 60;
+        NumberOfDeletes = 60;
+        break;
+    default:
+        i = 20;
+        NumberOfDeletes = 20;
+        break;
+    }
+
+    int randX = (std::rand() % 9);
+    int randY = (std::rand() % 9);
+
+    int licznik = 0;
+    while (licznik < NumberOfDeletes) {
+        if (IsDeletable(randX, randY)) {
+            Delete(randX, randY);
+            licznik++;
+        }
+    }
+    /*for (i; i > 0; --i) {
+        int randX = (std::rand() % 9);
+        int randY = (std::rand() % 9);
+        
+        int licznik = 0;
+        while (licznik < NumberOfDeletes) {
+            if (IsDeletable(randX, randY)) {
+                Delete(randX, randY);
+            }
+        }
+
+        if (IsDeletable(randX, randY)) {
+            Delete(randX, randY);
+        }
+        else {
+            i++;
+        }
+    }*/
+    return NumberOfDeletes;
+}
+
 bool back::SudokuSolver()
 {
     int row, col;
@@ -142,6 +291,16 @@ bool back::SudokuSolver()
             Board[row][col] = 0;
         }
     }
+
+    Liczba1 = 9;
+    Liczba2 = 9;
+    Liczba3 = 9;
+    Liczba4 = 9;
+    Liczba5 = 9;
+    Liczba6 = 9;
+    Liczba7 = 9;
+    Liczba8 = 9;
+    Liczba9 = 9;
 
     // This triggers backtracking
     return false;

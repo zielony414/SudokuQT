@@ -70,28 +70,10 @@ void MainWindow::FillTable(int Board[9][9]) {
 void MainWindow::HighlightNumbers(int x, int y, int num) {
 
     if ((BoardButtons[x][y]->text().toInt())==0){
-        BoardButtons[x][y]->setStyleSheet("background-color: #a9add1;");
+        BoardButtons[x][y]->setStyleSheet("background-color: #d16f6f;");
     }
     else
-    {
-        // zmiana kolorów przycisków w rzędzie
-        for (int i = 0; i < 9; ++i) {
-            if (BoardButtons[x][i]) {
-                BoardButtons[x][i]->setStyleSheet("background-color: #ced0eb;");
-            }
-            else {
-                qDebug() << "Button not found: ";
-            }
-
-            // zmiania kolorów przycisków w kolumnie
-            if (BoardButtons[i][y]) {
-                BoardButtons[i][y]->setStyleSheet("background-color: #ced0eb;");
-            }
-            else {
-                qDebug() << "Button not found: ";
-            }
-        }
-
+    {   
         // Zmiana kolorów przycisków obszaru 3x3
         int startRow = (x - (x % 3));
         int startCol = (y - (y % 3));
@@ -108,16 +90,18 @@ void MainWindow::HighlightNumbers(int x, int y, int num) {
         }
         // Zmiana koloru wszystkich liczb takich jak wciśnięty przycisk
         for (int i = 0; i < 9; i++) {
+            // zmiana kolorów przycisków w rzędzie
+            BoardButtons[x][i]->setStyleSheet("background-color: #ced0eb;");
+            // zmiania kolorów przycisków w kolumnie
+            BoardButtons[i][y]->setStyleSheet("background-color: #ced0eb;");
             for (int j = 0; j < 9; j++) {
                 if ((BoardButtons[i][j]->text().toInt()) == ClickedNumber) {
                     BoardButtons[i][j]->setStyleSheet("background-color: #a9add1;");
                 }
-                else
-                {
-                    qDebug() << "Button not found: ";
-                }
             }
         }
+        // Zmiana koloru wciśniętego przycisku
+        BoardButtons[x][y]->setStyleSheet("background-color: #a9add1;");
     }
 }
 
@@ -253,8 +237,7 @@ void MainWindow::on_GrajButton_clicked()
     InitializeBoardButtons();
     
     ClearTable();
-    Backend.DrawNumber(25);
-    //Backend.SudokuSolver();
+    Backend.Play(1);
     
 
     for (int i = 0; i < 9; ++i) {
@@ -336,6 +319,7 @@ void MainWindow::on_PodpowiedzButton_clicked() {
 
 void MainWindow::on_PorzucGreButton_clicked() {
     WynikGry = 0;
+    RevertColour();
     ui.WiadomoscGraLbl->setText("");
     ui.GameWidget->setVisible(false);
     ui.PlanszaWidget->setVisible(false);
