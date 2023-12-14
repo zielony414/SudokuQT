@@ -3,6 +3,38 @@
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
 {
+    StylNieaktywnych =
+        "QRadioButton{display: inline-block;"
+        "background-color: #b1b1b1;"
+        "font-size: 18px;"
+        "border: 2px solid #444;"
+        "border-radius: 4px;"
+        "padding: 8px 20px;}"
+        "QRadioButton::indicator{"
+        "opacity : 0;"
+        "position: fixed;"
+        "width : 0;}";
+
+    StylAktywnych =
+        "QRadioButton{display: inline-block;"
+        "background-color: #ddd;"
+        "padding:10px 20px;"
+        "font-size:18px;"
+        "border: 2px solid #444;"
+        "border-radius:4px;}"
+        "QRadioButton:hover{"
+        "background-color:#dfd;}"
+        "QRadioButton::indicator{"
+        "opacity:0;"
+        "position: fixed;"
+        "width:0;}"
+        "QRadioButton::pressed{"
+        "border:2px dashed #444;}"
+        "QRadioButton::checked{"
+        "background-color: #bfb;"
+        "border-color: #4c4;}";
+
+
     L1 = 0;
     L2 = 0;
     L3 = 0;
@@ -14,6 +46,7 @@ MainWindow::MainWindow(QWidget* parent)
     L9 = 0;
     WynikGry = 0;
     ui.setupUi(this);
+    ui.LvlWidget->setVisible(false);
     ui.GameWidget->setVisible(false);
     ui.MenuWidget->setVisible(false);
     ui.PlanszaWidget->setVisible(false);
@@ -42,6 +75,25 @@ void MainWindow::ClearTable()
     L8 = 0;
     L9 = 0;
     WynikGry = 0;
+
+    ui.nr1Btn->setEnabled(true);
+    ui.nr1Btn->setStyleSheet(StylAktywnych);
+    ui.nr2Btn->setEnabled(true);
+    ui.nr2Btn->setStyleSheet(StylAktywnych);
+    ui.nr3Btn->setEnabled(true);
+    ui.nr3Btn->setStyleSheet(StylAktywnych);
+    ui.nr4Btn->setEnabled(true);
+    ui.nr4Btn->setStyleSheet(StylAktywnych);
+    ui.nr5Btn->setEnabled(true);
+    ui.nr5Btn->setStyleSheet(StylAktywnych);
+    ui.nr6Btn->setEnabled(true);
+    ui.nr6Btn->setStyleSheet(StylAktywnych);
+    ui.nr7Btn->setEnabled(true);
+    ui.nr7Btn->setStyleSheet(StylAktywnych);
+    ui.nr8Btn->setEnabled(true);
+    ui.nr8Btn->setStyleSheet(StylAktywnych);
+    ui.nr9Btn->setEnabled(true);
+    ui.nr9Btn->setStyleSheet(StylAktywnych);
 }
 
 void MainWindow::FillTable(int Board[9][9]) {
@@ -119,63 +171,63 @@ void MainWindow::AddToCounter(int number) {
     switch (number) {
     case 1:
         L1++;
-        if (L1 == 9) {
+        if (L1 >= 9) {
             ui.nr1Btn->setEnabled(false);
             ui.nr1Btn->setStyleSheet(StylNieaktywnych);
         }
         break;
     case 2:
         L2++;
-        if (L2 == 9) {
+        if (L2 >= 9) {
             ui.nr2Btn->setEnabled(false);
             ui.nr2Btn->setStyleSheet(StylNieaktywnych);
         }
         break;
     case 3:
         L3++;
-        if (L3 == 9) {
+        if (L3 >= 9) {
             ui.nr3Btn->setEnabled(false);
             ui.nr3Btn->setStyleSheet(StylNieaktywnych);
         }
         break;
     case 4:
         L4++;
-        if (L4 == 9) {
+        if (L4 >= 9) {
             ui.nr4Btn->setEnabled(false);
             ui.nr4Btn->setStyleSheet(StylNieaktywnych);
         }
         break;
     case 5:
         L5++;
-        if (L5 == 9) {
+        if (L5 >= 9) {
             ui.nr5Btn->setEnabled(false);
             ui.nr5Btn->setStyleSheet(StylNieaktywnych);
         }
         break;
     case 6:
         L6++;
-        if (L6 == 9) {
+        if (L6 >= 9) {
             ui.nr6Btn->setEnabled(false);
             ui.nr6Btn->setStyleSheet(StylNieaktywnych);
         }
         break;
     case 7:
         L7++;
-        if (L7 == 9) {
+        if (L7 >= 9) {
             ui.nr7Btn->setEnabled(false);
             ui.nr7Btn->setStyleSheet(StylNieaktywnych);
         }
         break;
     case 8:
         L8++;
-        if (L8 == 9) {
+        if (L8 >= 9) {
             ui.nr8Btn->setEnabled(false);
             ui.nr8Btn->setStyleSheet(StylNieaktywnych);
         }
         break;
     case 9:
         L9++;
-        if (L9 == 9) {
+        if (L9 >= 9) {
             ui.nr9Btn->setEnabled(false);
             ui.nr9Btn->setStyleSheet(StylNieaktywnych);
         }
@@ -234,23 +286,8 @@ bool MainWindow::OnButtonPress(int x, int y, int num)
 /*------------------------Główne menu------------------------*/
 void MainWindow::on_GrajButton_clicked() 
 {
-    InitializeBoardButtons();
-    
-    ClearTable();
-    Backend.Play(1);
-    
-
-    for (int i = 0; i < 9; ++i) {
-        for (int j = 0; j < 9; ++j) {
-            board[i][j] = Backend.Retrive(i, j);
-        }
-    }
-
-    FillTable(board);
-
     ui.MenuWidget->setVisible(false);
-    ui.GameWidget->setVisible(true);
-    ui.PlanszaWidget->setVisible(true);
+    ui.LvlWidget->setVisible(true);
 };
 
 void MainWindow::on_StworzButton_clicked()
@@ -271,7 +308,72 @@ void MainWindow::on_WynikiButton_clicked()
 {
     ui.MenuWidget->setVisible(false);
     ui.TabelaWynWidget->setVisible(true);
-};
+}
+
+
+/*---------------------Menu wyboru poziomu---------------------*/
+void MainWindow::on_Lvl1Button_clicked()
+{
+    InitializeBoardButtons();
+
+    ClearTable();
+    Backend.Play(1);
+
+
+    for (int i = 0; i < 9; ++i) {
+        for (int j = 0; j < 9; ++j) {
+            board[i][j] = Backend.Retrive(i, j);
+        }
+    }
+
+    FillTable(board);
+
+    ui.LvlWidget->setVisible(false);
+    ui.GameWidget->setVisible(true);
+    ui.PlanszaWidget->setVisible(true);
+}
+
+void MainWindow::on_Lvl2Button_clicked()
+{
+    InitializeBoardButtons();
+
+    ClearTable();
+    Backend.Play(2);
+    
+
+    for (int i = 0; i < 9; ++i) {
+        for (int j = 0; j < 9; ++j) {
+            board[i][j] = Backend.Retrive(i, j);
+        }
+    }
+
+    FillTable(board);
+
+    ui.LvlWidget->setVisible(false);
+    ui.GameWidget->setVisible(true);
+    ui.PlanszaWidget->setVisible(true);
+}
+
+void MainWindow::on_Lvl3Button_clicked()
+{
+    InitializeBoardButtons();
+
+    ClearTable();
+    Backend.Play(3);
+
+
+    for (int i = 0; i < 9; ++i) {
+        for (int j = 0; j < 9; ++j) {
+            board[i][j] = Backend.Retrive(i, j);
+        }
+    }
+
+    FillTable(board);
+
+    ui.LvlWidget->setVisible(false);
+    ui.GameWidget->setVisible(true);
+    ui.PlanszaWidget->setVisible(true);
+}
 
 
 /*----------------------Panel zmiany nazwy----------------------*/

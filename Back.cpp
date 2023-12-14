@@ -207,65 +207,54 @@ int(&back::GetTable())[9][9]{
 int back::Play(int poziomTrud)
 {
     srand(time(NULL));
-
+    
 
     int NumberOfDeletes;
     int i;
+    int tempBoard[9][9] = {0};
+
     Clear();
     DrawNumber(5);
-    SudokuSolver();
+    SudokuSolver(Board);
 
     switch (poziomTrud) {
     case 1:
-        i = 20;
+        i = 25;
         NumberOfDeletes = 20;
         break;
     case 2:
-        i = 40;
+        i = 50;
         NumberOfDeletes = 40;
         break;
     case 3:
-        i = 60;
+        i = 70;
         NumberOfDeletes = 60;
         break;
     default:
-        i = 20;
+        i = 25;
         NumberOfDeletes = 20;
         break;
     }
 
-    int randX = (std::rand() % 9);
-    int randY = (std::rand() % 9);
 
     int licznik = 0;
     while (licznik < NumberOfDeletes) {
+        int randX = (std::rand() % 9);
+        int randY = (std::rand() % 9);
         if (IsDeletable(randX, randY)) {
             Delete(randX, randY);
             licznik++;
         }
     }
-    /*for (i; i > 0; --i) {
-        int randX = (std::rand() % 9);
-        int randY = (std::rand() % 9);
-        
-        int licznik = 0;
-        while (licznik < NumberOfDeletes) {
-            if (IsDeletable(randX, randY)) {
-                Delete(randX, randY);
-            }
-        }
 
-        if (IsDeletable(randX, randY)) {
-            Delete(randX, randY);
-        }
-        else {
-            i++;
-        }
-    }*/
+    
+
     return NumberOfDeletes;
+
 }
 
-bool back::SudokuSolver()
+
+bool back::SudokuSolver(int Table[9][9])
 {
     int row, col;
     if (!FindUnassignedLocation(row, col))
@@ -281,14 +270,14 @@ bool back::SudokuSolver()
         {
 
             // Make tentative assignment
-            Board[row][col] = num;
+            Table[row][col] = num;
 
             // Return, if success
-            if (SudokuSolver())
+            if (SudokuSolver(Table))
                 return true;
 
             // Failure, unmake & try again
-            Board[row][col] = 0;
+            Table[row][col] = 0;
         }
     }
 

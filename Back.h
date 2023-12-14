@@ -7,7 +7,7 @@ class back
 public:
 	void DrawNumber(int count);
 	int Show();
-	bool SudokuSolver();
+	bool SudokuSolver(int Table[9][9]);
 	bool IsSafe(int x, int y, int num);
 	bool FindUnassignedLocation(int& row, int& col);
 	void Clear();

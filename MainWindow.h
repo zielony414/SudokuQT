@@ -3,7 +3,6 @@
 #include <QtWidgets/QMainWindow>
 #include "ui_MainWindow.h"
 #include "Back.h"
-#include "Plansza.h"
 #include <iostream>
 #include <string>
 #include <QVector>
@@ -18,7 +17,6 @@ public:
     ~MainWindow();
 
     back Backend;
-    Plansza Plansza;
 
 private:
     Ui::MainWindowClass ui;
@@ -29,19 +27,9 @@ private:
     int L1, L2, L3, L4, L5, L6, L7, L8, L9;
     int ClickedNumber = 0;
     QVector<QVector<QPushButton*>> BoardButtons;
-    int board[9][9];
-    const char* StylNieaktywnych = 
-                "QRadioButton{display: inline-block;"
-                "background-color: #b1b1b1;"
-                "font-size: 18px;"
-                "font - family: sans - serif, Arial;"
-                "border: 2px solid #444;"
-                "border-radius: 4px;"
-                "padding: 8px 20px;}"
-                "QRadioButton::indicator{"
-                "opacity : 0;"
-                "position: fixed;"
-                "width : 0;}";
+    int board[9][9] = {0};
+    const char* StylNieaktywnych;
+    const char* StylAktywnych;
 
     void ClearTable();
     void AddToCounter(int number);
@@ -58,7 +46,10 @@ private slots:
     void on_UzytkownikButton_clicked();
     void on_WynikiButton_clicked();
 
-    
+    void on_Lvl1Button_clicked();
+    void on_Lvl2Button_clicked();
+    void on_Lvl3Button_clicked();
+
     void on_PodpowiedzButton_clicked();
     void on_PorzucGreButton_clicked();
 
