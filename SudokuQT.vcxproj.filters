@@ -43,9 +43,15 @@
     <ClCompile Include="Back.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Wynik.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Back.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Wynik.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

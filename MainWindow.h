@@ -3,6 +3,7 @@
 #include <QtWidgets/QMainWindow>
 #include "ui_MainWindow.h"
 #include "Back.h"
+#include <vector>
 #include <iostream>
 #include <string>
 #include <QVector>
@@ -15,6 +16,7 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget* parent = nullptr);
     ~MainWindow();
+    //Ui::MainWindowClass* getUi() const;
 
     back Backend;
 
@@ -25,8 +27,10 @@ private:
     int NrPrzycisku = 1;
     int WynikGry;
     int L1, L2, L3, L4, L5, L6, L7, L8, L9;
+    vector <int> Liczby;
     int ClickedNumber = 0;
     QVector<QVector<QPushButton*>> BoardButtons;
+    QVector<QRadioButton*> NumberButtons;
     int board[9][9] = {0};
     const char* StylNieaktywnych;
     const char* StylAktywnych;
@@ -34,8 +38,10 @@ private:
     void ClearTable();
     void AddToCounter(int number);
     void InitializeBoardButtons();
+    void InitializeNumberButtons();
     void RevertColour();
-    void HighlightNumbers(int x, int y, int num);
+    void HighlightTable(int x, int y, int num);
+    void HighlightNumbers(int num);
     bool OnButtonPress(int x, int y, int num );
     void FillTable(int Board[9][9]);
 

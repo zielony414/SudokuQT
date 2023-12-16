@@ -34,17 +34,9 @@ MainWindow::MainWindow(QWidget* parent)
         "background-color: #bfb;"
         "border-color: #4c4;}";
 
-
-    L1 = 0;
-    L2 = 0;
-    L3 = 0;
-    L4 = 0;
-    L5 = 0;
-    L6 = 0;
-    L7 = 0;
-    L8 = 0;
-    L9 = 0;
+    Liczby.resize(9, 0);
     WynikGry = 0;
+
     ui.setupUi(this);
     ui.LvlWidget->setVisible(false);
     ui.GameWidget->setVisible(false);
@@ -55,45 +47,31 @@ MainWindow::MainWindow(QWidget* parent)
     ui.WypelnijWidget->setVisible(false);
     ui.plainTextEdit->setVisible(false);
     ui.NieZmieniajNazwyBtn->setVisible(false);
+    InitializeNumberButtons();
 }
 
 MainWindow::~MainWindow()
-{}
+{
+    delete &ui;
+}
+
+//Ui::MainWindowClass* MainWindow::getUi() const
+//{
+//    return ui;
+//}
 
 
 /*----------------Funkcje działające na tablicy----------------*/
 void MainWindow::ClearTable()
 {
     Backend.Clear();
-    L1 = 0;
-    L2 = 0;
-    L3 = 0;
-    L4 = 0;
-    L5 = 0;
-    L6 = 0;
-    L7 = 0;
-    L8 = 0;
-    L9 = 0;
+    std::fill(Liczby.begin(), Liczby.end(), 0);
     WynikGry = 0;
 
-    ui.nr1Btn->setEnabled(true);
-    ui.nr1Btn->setStyleSheet(StylAktywnych);
-    ui.nr2Btn->setEnabled(true);
-    ui.nr2Btn->setStyleSheet(StylAktywnych);
-    ui.nr3Btn->setEnabled(true);
-    ui.nr3Btn->setStyleSheet(StylAktywnych);
-    ui.nr4Btn->setEnabled(true);
-    ui.nr4Btn->setStyleSheet(StylAktywnych);
-    ui.nr5Btn->setEnabled(true);
-    ui.nr5Btn->setStyleSheet(StylAktywnych);
-    ui.nr6Btn->setEnabled(true);
-    ui.nr6Btn->setStyleSheet(StylAktywnych);
-    ui.nr7Btn->setEnabled(true);
-    ui.nr7Btn->setStyleSheet(StylAktywnych);
-    ui.nr8Btn->setEnabled(true);
-    ui.nr8Btn->setStyleSheet(StylAktywnych);
-    ui.nr9Btn->setEnabled(true);
-    ui.nr9Btn->setStyleSheet(StylAktywnych);
+    for (int i = 0; i < 9; i++) {
+        NumberButtons[i]->setEnabled(true);
+        NumberButtons[i]->setStyleSheet(StylAktywnych);
+    }
 }
 
 void MainWindow::FillTable(int Board[9][9]) {
@@ -119,7 +97,7 @@ void MainWindow::FillTable(int Board[9][9]) {
 
 }
 
-void MainWindow::HighlightNumbers(int x, int y, int num) {
+void MainWindow::HighlightTable(int x, int y, int num) {
 
     if ((BoardButtons[x][y]->text().toInt())==0){
         BoardButtons[x][y]->setStyleSheet("background-color: #d16f6f;");
@@ -140,6 +118,7 @@ void MainWindow::HighlightNumbers(int x, int y, int num) {
                 }
             }
         }
+        
         // Zmiana koloru wszystkich liczb takich jak wciśnięty przycisk
         for (int i = 0; i < 9; i++) {
             // zmiana kolorów przycisków w rzędzie
@@ -157,6 +136,17 @@ void MainWindow::HighlightNumbers(int x, int y, int num) {
     }
 }
 
+void MainWindow::HighlightNumbers(int num)
+{
+    for (int i = 0; i < 9; i++) {
+        for (int j = 0; j < 9; j++) {
+            if ((BoardButtons[i][j]->text().toInt()) == num) {
+                BoardButtons[i][j]->setStyleSheet("background-color: #a9add1;");
+            }
+        }
+    }
+}
+
 void MainWindow::RevertColour() {
     for (int i = 0; i < 9; i++) {
         for (int j = 0; j < 9; j++) {
@@ -168,73 +158,11 @@ void MainWindow::RevertColour() {
 
 /*-------------Funkcje działające na przyciskach-------------*/
 void MainWindow::AddToCounter(int number) {
-    switch (number) {
-    case 1:
-        L1++;
-        if (L1 >= 9) {
-            ui.nr1Btn->setEnabled(false);
-            ui.nr1Btn->setStyleSheet(StylNieaktywnych);
-        }
-        break;
-    case 2:
-        L2++;
-        if (L2 >= 9) {
-            ui.nr2Btn->setEnabled(false);
-            ui.nr2Btn->setStyleSheet(StylNieaktywnych);
-        }
-        break;
-    case 3:
-        L3++;
-        if (L3 >= 9) {
-            ui.nr3Btn->setEnabled(false);
-            ui.nr3Btn->setStyleSheet(StylNieaktywnych);
-        }
-        break;
-    case 4:
-        L4++;
-        if (L4 >= 9) {
-            ui.nr4Btn->setEnabled(false);
-            ui.nr4Btn->setStyleSheet(StylNieaktywnych);
-        }
-        break;
-    case 5:
-        L5++;
-        if (L5 >= 9) {
-            ui.nr5Btn->setEnabled(false);
-            ui.nr5Btn->setStyleSheet(StylNieaktywnych);
-        }
-        break;
-    case 6:
-        L6++;
-        if (L6 >= 9) {
-            ui.nr6Btn->setEnabled(false);
-            ui.nr6Btn->setStyleSheet(StylNieaktywnych);
-        }
-        break;
-    case 7:
-        L7++;
-        if (L7 >= 9) {
-            ui.nr7Btn->setEnabled(false);
-            ui.nr7Btn->setStyleSheet(StylNieaktywnych);
-        }
-        break;
-    case 8:
-        L8++;
-        if (L8 >= 9) {
-            ui.nr8Btn->setEnabled(false);
-            ui.nr8Btn->setStyleSheet(StylNieaktywnych);
-        }
-        break;
-    case 9:
-        L9++;
-        if (L9 >= 9) {
-            ui.nr9Btn->setEnabled(false);
-            ui.nr9Btn->setStyleSheet(StylNieaktywnych);
-        }
-        break;
-    default:
-        std::cerr << "Nieobsługiwana liczba" << std::endl;
-        break;
+
+    Liczby[number-1]++;
+    if (Liczby[number-1] >= 9) {
+        NumberButtons[number - 1]->setEnabled(false);
+        NumberButtons[number - 1]->setStyleSheet(StylNieaktywnych);
     }
 }
 
@@ -255,6 +183,17 @@ void MainWindow::InitializeBoardButtons()
     }
 }
 
+void MainWindow::InitializeNumberButtons()
+{
+    for (int i = 1; i < 10; i++) {
+        QString buttonName = "nr" + QString::number(i) + "Btn";
+        QRadioButton* button = findChild<QRadioButton*>(buttonName);
+
+        // Dodaj przycisk do wektora 
+        NumberButtons.push_back(button);
+    }
+}
+
 bool MainWindow::OnButtonPress(int x, int y, int num)
 {
     // Konwersja na przedział 0 - 8
@@ -268,7 +207,7 @@ bool MainWindow::OnButtonPress(int x, int y, int num)
     {
         BoardButtons[x][y]->setText(QString::number(NrPrzycisku));
         ClickedNumber = BoardButtons[x][y]->text().toInt();
-        HighlightNumbers(x, y, ClickedNumber);
+        HighlightTable(x, y, ClickedNumber);
         AddToCounter(ClickedNumber);
         Backend.Insert(x, y, num);
         ui.WiadomoscGraLbl->setText("");
@@ -276,7 +215,7 @@ bool MainWindow::OnButtonPress(int x, int y, int num)
     }
     else {
         ClickedNumber = BoardButtons[x][y]->text().toInt();
-        HighlightNumbers(x, y, ClickedNumber);
+        HighlightTable(x, y, ClickedNumber);
         ui.WiadomoscGraLbl->setText("");
         return false;
     }
@@ -454,15 +393,15 @@ void MainWindow::on_WyjdzWynikiButton_clicked() {
 
 /*--------------------Panel przycisków planszy--------------------*/
 /* Wybór numeru do wypełnienia */
-void MainWindow::on_nr1Btn_clicked() { NrPrzycisku = 1; }
-void MainWindow::on_nr2Btn_clicked() { NrPrzycisku = 2; }
-void MainWindow::on_nr3Btn_clicked() { NrPrzycisku = 3; }
-void MainWindow::on_nr4Btn_clicked() { NrPrzycisku = 4; }
-void MainWindow::on_nr5Btn_clicked() { NrPrzycisku = 5; }
-void MainWindow::on_nr6Btn_clicked() { NrPrzycisku = 6; }
-void MainWindow::on_nr7Btn_clicked() { NrPrzycisku = 7; }
-void MainWindow::on_nr8Btn_clicked() { NrPrzycisku = 8; }
-void MainWindow::on_nr9Btn_clicked() { NrPrzycisku = 9; }
+void MainWindow::on_nr1Btn_clicked() { NrPrzycisku = 1; RevertColour(); HighlightNumbers(1);}
+void MainWindow::on_nr2Btn_clicked() { NrPrzycisku = 2; RevertColour(); HighlightNumbers(2);}
+void MainWindow::on_nr3Btn_clicked() { NrPrzycisku = 3; RevertColour(); HighlightNumbers(3);}
+void MainWindow::on_nr4Btn_clicked() { NrPrzycisku = 4; RevertColour(); HighlightNumbers(4);}
+void MainWindow::on_nr5Btn_clicked() { NrPrzycisku = 5; RevertColour(); HighlightNumbers(5);}
+void MainWindow::on_nr6Btn_clicked() { NrPrzycisku = 6; RevertColour(); HighlightNumbers(6);}
+void MainWindow::on_nr7Btn_clicked() { NrPrzycisku = 7; RevertColour(); HighlightNumbers(7);}
+void MainWindow::on_nr8Btn_clicked() { NrPrzycisku = 8; RevertColour(); HighlightNumbers(8);}
+void MainWindow::on_nr9Btn_clicked() { NrPrzycisku = 9; RevertColour(); HighlightNumbers(9);}
 
 
 

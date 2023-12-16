@@ -220,19 +220,19 @@ int back::Play(int poziomTrud)
     switch (poziomTrud) {
     case 1:
         i = 25;
-        NumberOfDeletes = 20;
+        NumberOfDeletes = 25;
         break;
     case 2:
         i = 50;
-        NumberOfDeletes = 40;
+        NumberOfDeletes = 50;
         break;
     case 3:
         i = 70;
-        NumberOfDeletes = 60;
+        NumberOfDeletes = 70;
         break;
     default:
         i = 25;
-        NumberOfDeletes = 20;
+        NumberOfDeletes = 25;
         break;
     }
 
