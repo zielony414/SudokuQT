@@ -36,6 +36,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     Liczby.resize(9, 0);
     WynikGry = 0;
+    LabelCzas = findChild<QLabel*>("CzasLicznikLbl");
 
     ui.setupUi(this);
     ui.LvlWidget->setVisible(false);
@@ -55,10 +56,15 @@ MainWindow::~MainWindow()
     delete &ui;
 }
 
-//Ui::MainWindowClass* MainWindow::getUi() const
-//{
-//    return ui;
-//}
+void MainWindow::UpdateTime(string time)
+{
+    
+}
+
+void MainWindow::UpdateScore(int score)
+{
+    //ui.PunktyLicznikLbl->setText(QString::number(score));
+}
 
 
 /*----------------Funkcje działające na tablicy----------------*/
@@ -270,6 +276,7 @@ void MainWindow::on_Lvl1Button_clicked()
     ui.LvlWidget->setVisible(false);
     ui.GameWidget->setVisible(true);
     ui.PlanszaWidget->setVisible(true);
+    wyn.startTime();
 }
 
 void MainWindow::on_Lvl2Button_clicked()
@@ -402,7 +409,6 @@ void MainWindow::on_nr6Btn_clicked() { NrPrzycisku = 6; RevertColour(); Highligh
 void MainWindow::on_nr7Btn_clicked() { NrPrzycisku = 7; RevertColour(); HighlightNumbers(7);}
 void MainWindow::on_nr8Btn_clicked() { NrPrzycisku = 8; RevertColour(); HighlightNumbers(8);}
 void MainWindow::on_nr9Btn_clicked() { NrPrzycisku = 9; RevertColour(); HighlightNumbers(9);}
-
 
 
 /* Przyciski z planszy */

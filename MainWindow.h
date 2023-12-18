@@ -3,6 +3,7 @@
 #include <QtWidgets/QMainWindow>
 #include "ui_MainWindow.h"
 #include "Back.h"
+#include "Wynik.h"
 #include <vector>
 #include <iostream>
 #include <string>
@@ -16,17 +17,20 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget* parent = nullptr);
     ~MainWindow();
-    //Ui::MainWindowClass* getUi() const;
+
+    static void UpdateTime(string time);
+    static void UpdateScore(int score);
 
     back Backend;
+    Wynik wyn;
 
 private:
     Ui::MainWindowClass ui;
-    std::string NazwaUzytkownika;
 
+    QLabel* LabelCzas;
+    std::string NazwaUzytkownika;
     int NrPrzycisku = 1;
     int WynikGry;
-    int L1, L2, L3, L4, L5, L6, L7, L8, L9;
     vector <int> Liczby;
     int ClickedNumber = 0;
     QVector<QVector<QPushButton*>> BoardButtons;

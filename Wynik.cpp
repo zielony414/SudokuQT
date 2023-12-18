@@ -1,9 +1,15 @@
 ﻿#include "Wynik.h"
-#include <chrono>
-#include <iostream>
+#include "MainWindow.h"
 
 
-Wynik::Wynik(QWidget* mainUi) : mainUi(mainUi) {}
+Wynik::Wynik() : isCounting(false), sekundy(0), minuty(0), score(0) {}
+Wynik::~Wynik()
+{
+    if (isCounting) {
+        stopTime();
+    }
+}
+
 
 int Wynik::GetScore()
 {
@@ -23,41 +29,32 @@ void Wynik::BonusPoints()
 {
 }
 
-void Wynik::StopTime()
-{
-    if (running) {
-        running = false;
-        if (timerThread.joinable()) {
-            timerThread.join();
-        }
+void Wynik::startTime() {
+    if (!isCounting) {
+        isCounting = true;
+        counterThread = std::thread(&Wynik::timeCounter, this);
     }
 }
 
-void Wynik::StartTime()
-{
-    if (!running) {
-        running = true;
-        timerThread = std::thread(&Wynik::IncrementTime, this);
+void Wynik::stopTime() {
+    if (isCounting) {
+        isCounting = false;
+        counterThread.join();
     }
 }
 
-int Wynik::GetTime()
-{
-    return seconds;
-}
 
-void Wynik::RestartTime()
-{
-}
-
-void Wynik::IncrementTime()
-{
-    while (running) {
+void Wynik::timeCounter() {
+    while (isCounting) {
         std::this_thread::sleep_for(std::chrono::seconds(1));
-        seconds++;
-
-        if (mainUi) {
-            // Do something with mainUi
+        ++sekundy;
+        if (sekundy > 59) {
+            ++minuty;
+            sekundy = 0;
         }
+        czas = minuty + ":" + sekundy;
+        MainWindow::UpdateTime(czas);
     }
 }
+
+

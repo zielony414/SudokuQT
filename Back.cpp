@@ -198,6 +198,7 @@ bool back::IsDeletable(int x, int y)
         }
         break;
     }
+    return false;
 }
 
 int(&back::GetTable())[9][9]{

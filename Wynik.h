@@ -1,30 +1,33 @@
 #pragma once
-#include "MainWindow.h"
+#include <iostream>
 #include <thread>
+#include <chrono>
+#include <string>
 
-#include <atomic>
+
+class MainWindow;
 
 class Wynik
 {
 public:
-	Wynik(QWidget* mainUi);
+	Wynik();
+	~Wynik();
 
 	int GetScore();
 	void SetScoreZero();
 	void AddPoints();
 	void BonusPoints();
-	void StopTime();
-	void StartTime();
-	int GetTime();
-	void RestartTime();
+	void startTime();
+	void stopTime();
 
 private:
-	void IncrementTime();
+	std::thread counterThread;
+	bool isCounting;
+	int sekundy;
+	int minuty;
+	int score;
+	std::string czas;
 
-	std::atomic<bool> running{ false };
-	std::atomic<int> seconds{ 0 };
-	std::thread timerThread;
-	int score = 0;
-	QWidget* mainUi;
+	void timeCounter();
 };
 
