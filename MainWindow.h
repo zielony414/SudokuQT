@@ -9,6 +9,9 @@
 #include <string>
 #include <QVector>
 #include <QPushButton>
+#include <QObject>
+
+class Wynik;
 
 class MainWindow : public QMainWindow
 {
@@ -18,16 +21,15 @@ public:
     MainWindow(QWidget* parent = nullptr);
     ~MainWindow();
 
-    static void UpdateTime(string time);
-    static void UpdateScore(int score);
 
     back Backend;
-    Wynik wyn;
+    
 
 private:
     Ui::MainWindowClass ui;
 
-    QLabel* LabelCzas;
+    Wynik wynik;
+
     std::string NazwaUzytkownika;
     int NrPrzycisku = 1;
     int WynikGry;
@@ -48,9 +50,13 @@ private:
     void HighlightNumbers(int num);
     bool OnButtonPress(int x, int y, int num );
     void FillTable(int Board[9][9]);
+    void CalculateBonuses(int x, int y);
 
 
 private slots:
+    void aktualizujCzasGry(std::string czas);
+    void aktualizujPunkty(int points);
+
     void on_GrajButton_clicked();
     void on_StworzButton_clicked();
     void on_UzytkownikButton_clicked();

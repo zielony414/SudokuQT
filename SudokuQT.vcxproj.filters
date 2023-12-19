@@ -51,8 +51,10 @@
     <ClInclude Include="Back.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Wynik.h">
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="Wynik.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
+    </QtMoc>
   </ItemGroup>
 </Project>

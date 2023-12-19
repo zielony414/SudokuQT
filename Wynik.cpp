@@ -1,60 +1,55 @@
 ﻿#include "Wynik.h"
-#include "MainWindow.h"
 
-
-Wynik::Wynik() : isCounting(false), sekundy(0), minuty(0), score(0) {}
-Wynik::~Wynik()
-{
-    if (isCounting) {
-        stopTime();
-    }
+Wynik::Wynik(QObject* parent) : QObject(parent), Sec(0), Min(0), score(0) {
+    timer = new QTimer(this);
+    connect(timer, &QTimer::timeout, this, &Wynik::updateTimer);
 }
 
+std::string Wynik::GetTime()
+{
+    return czas;
+}
+
+void Wynik::StartTimer() {
+    Sec = 0;
+    timer->start(1000); // Uruchamia timer z interwałem 1 sekundy.
+}
+
+void Wynik::StopTimer() {
+    timer->stop();
+    Min = 0;
+    Sec = 0;
+}
 
 int Wynik::GetScore()
 {
     return score;
 }
 
-void Wynik::SetScoreZero()
+void Wynik::AddScore(int linia, bool kwadrat, bool liczba)
 {
-    score = 0;
-}
-
-void Wynik::AddPoints()
-{
-}
-
-void Wynik::BonusPoints()
-{
-}
-
-void Wynik::startTime() {
-    if (!isCounting) {
-        isCounting = true;
-        counterThread = std::thread(&Wynik::timeCounter, this);
+    switch (linia) {
+        case 0:
+            break;
+        case 1:
+            break;
+        case 2:
+            break;
     }
 }
 
-void Wynik::stopTime() {
-    if (isCounting) {
-        isCounting = false;
-        counterThread.join();
+void Wynik::updateTimer() {
+    Sec++;
+    if (Sec == 60) {
+        Sec = 0;
+        ++Min;
     }
-}
-
-
-void Wynik::timeCounter() {
-    while (isCounting) {
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-        ++sekundy;
-        if (sekundy > 59) {
-            ++minuty;
-            sekundy = 0;
-        }
-        czas = minuty + ":" + sekundy;
-        MainWindow::UpdateTime(czas);
+    if ((Sec / 10) == 0) {
+        czas = std::to_string(Min) + ":0" + std::to_string(Sec);
     }
+    else {
+        czas = std::to_string(Min) + ":" + std::to_string(Sec);
+    }
+
+    emit aktualizujCzasGry(czas);
 }
-
-

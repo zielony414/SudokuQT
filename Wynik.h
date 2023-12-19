@@ -1,33 +1,35 @@
-#pragma once
-#include <iostream>
-#include <thread>
-#include <chrono>
+#ifndef WYNIK_H
+#define WYNIK_H
+
+#include <QObject>
+#include <QTimer>
+#include <QString>
 #include <string>
 
+class Wynik : public QObject {
+    Q_OBJECT
 
-class MainWindow;
-
-class Wynik
-{
 public:
-	Wynik();
-	~Wynik();
+    explicit Wynik(QObject* parent = nullptr);
+    std::string GetTime();
+    void StartTimer();
+    void StopTimer();
+    int GetScore();
+    void AddScore(int linia, bool kwadrat, bool liczba);
 
-	int GetScore();
-	void SetScoreZero();
-	void AddPoints();
-	void BonusPoints();
-	void startTime();
-	void stopTime();
+signals:
+    void aktualizujCzasGry(std::string czas);
+    void aktualizujPunkty(int points);
+
+private slots:
+    void updateTimer();
 
 private:
-	std::thread counterThread;
-	bool isCounting;
-	int sekundy;
-	int minuty;
-	int score;
-	std::string czas;
-
-	void timeCounter();
+    QTimer* timer;
+    int Sec;
+    int Min;
+    int score;
+    std::string czas;
 };
 
+#endif // WYNIK_H

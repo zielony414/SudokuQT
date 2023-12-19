@@ -4691,7 +4691,7 @@ font-size: 14px;
 </string>
         </property>
         <property name="text">
-         <string>Placeholder</string>
+         <string>0</string>
         </property>
        </widget>
       </item>
@@ -4749,7 +4749,7 @@ font-size: 14px;
 </string>
         </property>
         <property name="text">
-         <string>Placeholder</string>
+         <string>0:00</string>
         </property>
        </widget>
       </item>

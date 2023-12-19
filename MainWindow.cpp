@@ -1,4 +1,7 @@
 ﻿#include "MainWindow.h"
+#include "Wynik.h"
+
+
 /*----------------------Inicjalizacja----------------------*/
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
@@ -36,7 +39,11 @@ MainWindow::MainWindow(QWidget* parent)
 
     Liczby.resize(9, 0);
     WynikGry = 0;
-    LabelCzas = findChild<QLabel*>("CzasLicznikLbl");
+
+    connect(&wynik, SIGNAL(aktualizujCzasGry(std::string)), this, SLOT(aktualizujCzasGry(std::string)), Qt::UniqueConnection);
+    connect(&wynik, SIGNAL(aktualizujCzasGry(std::string)), this, SLOT(aktualizujCzasGry(std::string)), Qt::UniqueConnection);
+
+
 
     ui.setupUi(this);
     ui.LvlWidget->setVisible(false);
@@ -53,17 +60,18 @@ MainWindow::MainWindow(QWidget* parent)
 
 MainWindow::~MainWindow()
 {
-    delete &ui;
 }
 
-void MainWindow::UpdateTime(string time)
+
+
+void MainWindow::aktualizujCzasGry(std::string czas) 
 {
-    
+    ui.CzasLicznikLbl->setText(QString::fromStdString(czas));
 }
 
-void MainWindow::UpdateScore(int score)
+void MainWindow::aktualizujPunkty(int points) 
 {
-    //ui.PunktyLicznikLbl->setText(QString::number(score));
+    ui.PunktyLicznikLbl->setText(QString::number(points));
 }
 
 
@@ -208,7 +216,6 @@ bool MainWindow::OnButtonPress(int x, int y, int num)
 
     RevertColour();
 
-
     if (Backend.IsSafe(x, y, num))
     {
         BoardButtons[x][y]->setText(QString::number(NrPrzycisku));
@@ -276,7 +283,7 @@ void MainWindow::on_Lvl1Button_clicked()
     ui.LvlWidget->setVisible(false);
     ui.GameWidget->setVisible(true);
     ui.PlanszaWidget->setVisible(true);
-    wyn.startTime();
+    wynik.StartTimer();
 }
 
 void MainWindow::on_Lvl2Button_clicked()
@@ -298,6 +305,7 @@ void MainWindow::on_Lvl2Button_clicked()
     ui.LvlWidget->setVisible(false);
     ui.GameWidget->setVisible(true);
     ui.PlanszaWidget->setVisible(true);
+    wynik.StartTimer();
 }
 
 void MainWindow::on_Lvl3Button_clicked()
@@ -319,6 +327,7 @@ void MainWindow::on_Lvl3Button_clicked()
     ui.LvlWidget->setVisible(false);
     ui.GameWidget->setVisible(true);
     ui.PlanszaWidget->setVisible(true);
+    wynik.StartTimer();
 }
 
 
@@ -362,7 +371,7 @@ void MainWindow::on_NieZmieniajNazwyBtn_clicked() {
 
 /*-----------------------Panel gry w sudoku-----------------------*/
 void MainWindow::on_PodpowiedzButton_clicked() {
-
+    wynik.StopTimer();
 }
 
 void MainWindow::on_PorzucGreButton_clicked() {
@@ -372,6 +381,13 @@ void MainWindow::on_PorzucGreButton_clicked() {
     ui.GameWidget->setVisible(false);
     ui.PlanszaWidget->setVisible(false);
     ui.MenuWidget->setVisible(true);
+}
+
+void MainWindow::CalculateBonuses(int x, int y)
+{
+    for (int i = 0; i < 9; i++) {
+        
+    }
 }
 
 
