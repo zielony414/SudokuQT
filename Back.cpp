@@ -30,16 +30,6 @@ void back::DrawNumber(int count)
 
 }
 
-int back::Show()
-{
-    for (int i = 0; i < 9; ++i) {
-        for (int j = 0; j < 9; ++j) {
-            cout << Board[i][j] << " ";
-        }
-        cout << endl;
-    }
-    return 0;
-}
 
 bool back::IsSafe(int row, int col, int num)
 {
@@ -54,12 +44,9 @@ bool back::IsSafe(int row, int col, int num)
             return false;
         }
 
-    }
-    for (int i = 0; i < 9; ++i) {
         // sprawdzenie czy w wylosowanej linii nie ma juz liczby
         if (Board[i][col] == num) {
             return false;
-
         }
     }
 
@@ -76,7 +63,19 @@ bool back::IsSafe(int row, int col, int num)
         }
     }
 
+
+
     return true;
+}
+
+bool back::IsCorrect(int x, int y, int num)
+{
+    if (DoneBoard[x][y] == num and Board[x][y] == 0) {
+        return true; 
+    }
+    else { 
+        return false; 
+    }
 }
 
 bool back::FindUnassignedLocation(int& row, int& col)
@@ -115,90 +114,14 @@ int back::Retrive(int row, int col)
 bool back::IsDeletable(int x, int y)
 {
     int numer = Board[x][y];
-    switch(numer){
-    case 1:
-        if (Liczba1 > 1) {
-            Liczba1--;
-            return true;
-        }
-        else {
-            return false;
-        }
-        break;
-    case 2:
-        if (Liczba2 > 1) {
-            Liczba2--;
-            return true;
-        }
-        else {
-            return false;
-        }
-        break;
-    case 3:
-        if (Liczba3 > 1) {
-            Liczba3--;
-            return true;
-        }
-        else {
-            return false;
-        }
-        break;
-    case 4:
-        if (Liczba4 > 1) {
-            Liczba4--;
-            return true;
-        }
-        else {
-            return false;
-        }
-        break;
-    case 5:
-        if (Liczba5 > 1) {
-            Liczba5--;
-            return true;
-        }
-        else {
-            return false;
-        }
-        break;
-    case 6:
-        if (Liczba6 > 1) {
-            Liczba6--;
-            return true;
-        }
-        else {
-            return false;
-        }
-        break;
-    case 7:
-        if (Liczba7 > 1) {
-            Liczba7--;
-            return true;
-        }
-        else {
-            return false;
-        }
-        break;
-    case 8:
-        if (Liczba8 > 1) {
-            Liczba8--;
-            return true;
-        }
-        else {
-            return false;
-        }
-        break;
-    case 9:
-        if (Liczba9 > 1) {
-            Liczba9--;
-            return true;
-        }
-        else {
-            return false;
-        }
-        break;
+
+    if (Liczby[numer - 1] > 0) {
+        Liczby[numer - 1]--;
+        return true;
     }
-    return false;
+    else {
+        return false;
+    }
 }
 
 int(&back::GetTable())[9][9]{
@@ -212,11 +135,17 @@ int back::Play(int poziomTrud)
 
     int NumberOfDeletes;
     int i;
-    int tempBoard[9][9] = {0};
 
     Clear();
     DrawNumber(5);
     SudokuSolver(Board);
+
+    for (int j = 0; j < 9; j++) {
+        for (int k = 0; k < 9; k++) {
+            DoneBoard[j][k] = Board[j][k];
+        }
+    }
+    int MisteriouslyChangingInt = DoneBoard[8][8];
 
     switch (poziomTrud) {
     case 1:
@@ -248,12 +177,11 @@ int back::Play(int poziomTrud)
         }
     }
 
-    
+    DoneBoard[8][8] = MisteriouslyChangingInt;
 
     return NumberOfDeletes;
 
 }
-
 
 bool back::SudokuSolver(int Table[9][9])
 {
@@ -282,16 +210,9 @@ bool back::SudokuSolver(int Table[9][9])
         }
     }
 
-    Liczba1 = 9;
-    Liczba2 = 9;
-    Liczba3 = 9;
-    Liczba4 = 9;
-    Liczba5 = 9;
-    Liczba6 = 9;
-    Liczba7 = 9;
-    Liczba8 = 9;
-    Liczba9 = 9;
-
+    for (int i = 0; i < 9; i++) {
+        Liczby[i] = 9;
+    }
     // This triggers backtracking
     return false;
 }

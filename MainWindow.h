@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <QtWidgets/QMainWindow>
 #include "ui_MainWindow.h"
@@ -11,6 +11,8 @@
 #include <QPushButton>
 #include <QObject>
 
+
+
 class Wynik;
 
 class MainWindow : public QMainWindow
@@ -21,23 +23,24 @@ public:
     MainWindow(QWidget* parent = nullptr);
     ~MainWindow();
 
-
-    back Backend;
-    
-
 private:
     Ui::MainWindowClass ui;
 
     Wynik wynik;
+    back Backend;
 
     std::string NazwaUzytkownika;
-    int NrPrzycisku = 1;
-    int WynikGry;
+    std::string Trudnosc;
+    std::string Data;
+
+    int ClickedNumber = 1;
     vector <int> Liczby;
-    int ClickedNumber = 0;
+    int ClickedBoardNumber = 0;
     QVector<QVector<QPushButton*>> BoardButtons;
     QVector<QRadioButton*> NumberButtons;
     int board[9][9] = {0};
+
+
     const char* StylNieaktywnych;
     const char* StylAktywnych;
 
@@ -49,8 +52,8 @@ private:
     void HighlightTable(int x, int y, int num);
     void HighlightNumbers(int num);
     bool OnButtonPress(int x, int y, int num );
+    void EndGame();
     void FillTable(int Board[9][9]);
-    void CalculateBonuses(int x, int y);
 
 
 private slots:

@@ -1,10 +1,12 @@
-#ifndef WYNIK_H
+﻿#ifndef WYNIK_H
 #define WYNIK_H
 
 #include <QObject>
 #include <QTimer>
 #include <QString>
 #include <string>
+#include <ctime>
+#include <fstream>
 
 class Wynik : public QObject {
     Q_OBJECT
@@ -15,7 +17,10 @@ public:
     void StartTimer();
     void StopTimer();
     int GetScore();
-    void AddScore(int linia, bool kwadrat, bool liczba);
+    void CalculateBonuses(int Board[9][9], int x, int y);
+    void AddMinus();
+    void ClearData();
+    bool ExportScore(std::string NazwaUzytkownika, std::string Trudnosc);
 
 signals:
     void aktualizujCzasGry(std::string czas);
@@ -28,7 +33,8 @@ private:
     QTimer* timer;
     int Sec;
     int Min;
-    int score;
+    int NrOfMistakes = 0;
+    double score;
     std::string czas;
 };
 

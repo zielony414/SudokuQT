@@ -38,10 +38,9 @@ MainWindow::MainWindow(QWidget* parent)
         "border-color: #4c4;}";
 
     Liczby.resize(9, 0);
-    WynikGry = 0;
 
     connect(&wynik, SIGNAL(aktualizujCzasGry(std::string)), this, SLOT(aktualizujCzasGry(std::string)), Qt::UniqueConnection);
-    connect(&wynik, SIGNAL(aktualizujCzasGry(std::string)), this, SLOT(aktualizujCzasGry(std::string)), Qt::UniqueConnection);
+    connect(&wynik, SIGNAL(aktualizujPunkty(int)), this, SLOT(aktualizujPunkty(int)), Qt::UniqueConnection);
 
 
 
@@ -56,13 +55,12 @@ MainWindow::MainWindow(QWidget* parent)
     ui.plainTextEdit->setVisible(false);
     ui.NieZmieniajNazwyBtn->setVisible(false);
     InitializeNumberButtons();
+    InitializeBoardButtons();
 }
 
 MainWindow::~MainWindow()
 {
 }
-
-
 
 void MainWindow::aktualizujCzasGry(std::string czas) 
 {
@@ -78,9 +76,14 @@ void MainWindow::aktualizujPunkty(int points)
 /*----------------Funkcje działające na tablicy----------------*/
 void MainWindow::ClearTable()
 {
+    RevertColour();
     Backend.Clear();
+    wynik.ClearData();
     std::fill(Liczby.begin(), Liczby.end(), 0);
-    WynikGry = 0;
+
+    ui.WiadomoscGraLbl->setText("");
+    ui.PunktyLicznikLbl->setText("0");
+    ui.CzasLicznikLbl->setText("0:00");
 
     for (int i = 0; i < 9; i++) {
         NumberButtons[i]->setEnabled(true);
@@ -140,7 +143,7 @@ void MainWindow::HighlightTable(int x, int y, int num) {
             // zmiania kolorów przycisków w kolumnie
             BoardButtons[i][y]->setStyleSheet("background-color: #ced0eb;");
             for (int j = 0; j < 9; j++) {
-                if ((BoardButtons[i][j]->text().toInt()) == ClickedNumber) {
+                if ((BoardButtons[i][j]->text().toInt()) == ClickedBoardNumber) {
                     BoardButtons[i][j]->setStyleSheet("background-color: #a9add1;");
                 }
             }
@@ -177,6 +180,23 @@ void MainWindow::AddToCounter(int number) {
     if (Liczby[number-1] >= 9) {
         NumberButtons[number - 1]->setEnabled(false);
         NumberButtons[number - 1]->setStyleSheet(StylNieaktywnych);
+
+
+        for (int i = 0; i < 10; i++) {
+            if (i > 8) {
+                EndGame();
+                break;
+            }
+            else {
+                if (Liczby[i] < 9) {
+                    NumberButtons[i]->setChecked(true);
+                    ClickedNumber = i + 1;
+                    RevertColour();
+                    HighlightNumbers(ClickedNumber);
+                    break;
+                }
+            }
+        }
     }
 }
 
@@ -216,21 +236,32 @@ bool MainWindow::OnButtonPress(int x, int y, int num)
 
     RevertColour();
 
-    if (Backend.IsSafe(x, y, num))
+    if (Backend.IsCorrect(x, y, num))
     {
-        BoardButtons[x][y]->setText(QString::number(NrPrzycisku));
-        ClickedNumber = BoardButtons[x][y]->text().toInt();
-        HighlightTable(x, y, ClickedNumber);
-        AddToCounter(ClickedNumber);
+        BoardButtons[x][y]->setText(QString::number(ClickedNumber));
+        ClickedBoardNumber = BoardButtons[x][y]->text().toInt();
+        HighlightTable(x, y, ClickedBoardNumber);
+        AddToCounter(ClickedBoardNumber);
         Backend.Insert(x, y, num);
-        ui.WiadomoscGraLbl->setText("");
+        wynik.CalculateBonuses(Backend.GetTable(), x, y);
         return true;
     }
     else {
-        ClickedNumber = BoardButtons[x][y]->text().toInt();
-        HighlightTable(x, y, ClickedNumber);
-        ui.WiadomoscGraLbl->setText("");
+        ClickedBoardNumber = BoardButtons[x][y]->text().toInt();
+        HighlightTable(x, y, ClickedBoardNumber);
+        if(ClickedBoardNumber == 0) wynik.AddMinus();
         return false;
+    }
+}
+
+void MainWindow::EndGame()
+{
+    wynik.StopTimer();
+    ui.WiadomoscGraLbl->setText("Gratulacje! Rozwiązałeś sudoku");
+
+    if (NazwaUzytkownika != "")
+    {
+        wynik.ExportScore(NazwaUzytkownika, Trudnosc);
     }
 }
 
@@ -251,6 +282,7 @@ void MainWindow::on_StworzButton_clicked()
 
 void MainWindow::on_UzytkownikButton_clicked()
 {
+    ui.WiadomoscUzytkownik->setText("Jako gość twoje wyniki nie będą zapisane!");
     ui.MenuWidget->setVisible(false);
     ui.NieZmieniajNazwyBtn->setVisible(true);
     ui.UzytkownikWidget->setVisible(true);
@@ -266,10 +298,8 @@ void MainWindow::on_WynikiButton_clicked()
 /*---------------------Menu wyboru poziomu---------------------*/
 void MainWindow::on_Lvl1Button_clicked()
 {
-    InitializeBoardButtons();
-
-    ClearTable();
     Backend.Play(1);
+    Trudnosc = "Łatwy";
 
 
     for (int i = 0; i < 9; ++i) {
@@ -278,20 +308,22 @@ void MainWindow::on_Lvl1Button_clicked()
         }
     }
 
+
     FillTable(board);
+    
+
 
     ui.LvlWidget->setVisible(false);
     ui.GameWidget->setVisible(true);
     ui.PlanszaWidget->setVisible(true);
+    HighlightNumbers(ClickedNumber);
     wynik.StartTimer();
 }
 
 void MainWindow::on_Lvl2Button_clicked()
 {
-    InitializeBoardButtons();
-
-    ClearTable();
     Backend.Play(2);
+    Trudnosc = "Średni";
     
 
     for (int i = 0; i < 9; ++i) {
@@ -301,19 +333,17 @@ void MainWindow::on_Lvl2Button_clicked()
     }
 
     FillTable(board);
-
     ui.LvlWidget->setVisible(false);
     ui.GameWidget->setVisible(true);
     ui.PlanszaWidget->setVisible(true);
+    HighlightNumbers(ClickedNumber);
     wynik.StartTimer();
 }
 
 void MainWindow::on_Lvl3Button_clicked()
 {
-    InitializeBoardButtons();
-
-    ClearTable();
     Backend.Play(3);
+    Trudnosc = "Trudny";
 
 
     for (int i = 0; i < 9; ++i) {
@@ -323,10 +353,10 @@ void MainWindow::on_Lvl3Button_clicked()
     }
 
     FillTable(board);
-
     ui.LvlWidget->setVisible(false);
     ui.GameWidget->setVisible(true);
     ui.PlanszaWidget->setVisible(true);
+    HighlightNumbers(ClickedNumber);
     wynik.StartTimer();
 }
 
@@ -371,38 +401,35 @@ void MainWindow::on_NieZmieniajNazwyBtn_clicked() {
 
 /*-----------------------Panel gry w sudoku-----------------------*/
 void MainWindow::on_PodpowiedzButton_clicked() {
-    wynik.StopTimer();
+    
 }
 
-void MainWindow::on_PorzucGreButton_clicked() {
-    WynikGry = 0;
-    RevertColour();
-    ui.WiadomoscGraLbl->setText("");
+void MainWindow::on_PorzucGreButton_clicked() 
+{    
     ui.GameWidget->setVisible(false);
     ui.PlanszaWidget->setVisible(false);
     ui.MenuWidget->setVisible(true);
+    ClearTable();
 }
 
-void MainWindow::CalculateBonuses(int x, int y)
-{
-    for (int i = 0; i < 9; i++) {
-        
-    }
-}
 
 
 /*-------------------Panel rozwiązywania sudoku-------------------*/
-void MainWindow::on_WyjdzWypelnij_clicked() {
+void MainWindow::on_WyjdzWypelnij_clicked() 
+{
     ui.WypelnijWidget->setVisible(false);
     ui.PlanszaWidget->setVisible(false);
     ui.MenuWidget->setVisible(true);
+    ClearTable();
 }
 
-void MainWindow::on_RozwiazSudoku_clicked() {
+void MainWindow::on_RozwiazSudoku_clicked() 
+{
 
 }
 
-void MainWindow::on_WyczyscSudoku_clicked() {
+void MainWindow::on_WyczyscSudoku_clicked() 
+{
 
 }
 
@@ -416,268 +443,268 @@ void MainWindow::on_WyjdzWynikiButton_clicked() {
 
 /*--------------------Panel przycisków planszy--------------------*/
 /* Wybór numeru do wypełnienia */
-void MainWindow::on_nr1Btn_clicked() { NrPrzycisku = 1; RevertColour(); HighlightNumbers(1);}
-void MainWindow::on_nr2Btn_clicked() { NrPrzycisku = 2; RevertColour(); HighlightNumbers(2);}
-void MainWindow::on_nr3Btn_clicked() { NrPrzycisku = 3; RevertColour(); HighlightNumbers(3);}
-void MainWindow::on_nr4Btn_clicked() { NrPrzycisku = 4; RevertColour(); HighlightNumbers(4);}
-void MainWindow::on_nr5Btn_clicked() { NrPrzycisku = 5; RevertColour(); HighlightNumbers(5);}
-void MainWindow::on_nr6Btn_clicked() { NrPrzycisku = 6; RevertColour(); HighlightNumbers(6);}
-void MainWindow::on_nr7Btn_clicked() { NrPrzycisku = 7; RevertColour(); HighlightNumbers(7);}
-void MainWindow::on_nr8Btn_clicked() { NrPrzycisku = 8; RevertColour(); HighlightNumbers(8);}
-void MainWindow::on_nr9Btn_clicked() { NrPrzycisku = 9; RevertColour(); HighlightNumbers(9);}
+void MainWindow::on_nr1Btn_clicked() { ClickedNumber = 1; RevertColour(); HighlightNumbers(1);}
+void MainWindow::on_nr2Btn_clicked() { ClickedNumber = 2; RevertColour(); HighlightNumbers(2);}
+void MainWindow::on_nr3Btn_clicked() { ClickedNumber = 3; RevertColour(); HighlightNumbers(3);}
+void MainWindow::on_nr4Btn_clicked() { ClickedNumber = 4; RevertColour(); HighlightNumbers(4);}
+void MainWindow::on_nr5Btn_clicked() { ClickedNumber = 5; RevertColour(); HighlightNumbers(5);}
+void MainWindow::on_nr6Btn_clicked() { ClickedNumber = 6; RevertColour(); HighlightNumbers(6);}
+void MainWindow::on_nr7Btn_clicked() { ClickedNumber = 7; RevertColour(); HighlightNumbers(7);}
+void MainWindow::on_nr8Btn_clicked() { ClickedNumber = 8; RevertColour(); HighlightNumbers(8);}
+void MainWindow::on_nr9Btn_clicked() { ClickedNumber = 9; RevertColour(); HighlightNumbers(9);}
 
 
 /* Przyciski z planszy */
 void MainWindow::on_Button11_clicked() { 
-     OnButtonPress(1, 1, NrPrzycisku);
+     OnButtonPress(1, 1, ClickedNumber);
 }
 void MainWindow::on_Button12_clicked() {
-     OnButtonPress(1, 2, NrPrzycisku);
+     OnButtonPress(1, 2, ClickedNumber);
 }
 void MainWindow::on_Button13_clicked() {
-     OnButtonPress(1, 3, NrPrzycisku);
+     OnButtonPress(1, 3, ClickedNumber);
 }
 void MainWindow::on_Button14_clicked() {
-     OnButtonPress(1, 4, NrPrzycisku);
+     OnButtonPress(1, 4, ClickedNumber);
 }
 void MainWindow::on_Button15_clicked() {
-     OnButtonPress(1, 5, NrPrzycisku);
+     OnButtonPress(1, 5, ClickedNumber);
 }
 void MainWindow::on_Button16_clicked() {
-     OnButtonPress(1, 6, NrPrzycisku);
+     OnButtonPress(1, 6, ClickedNumber);
 
 }
 void MainWindow::on_Button17_clicked() {
-     OnButtonPress(1, 7, NrPrzycisku);
+     OnButtonPress(1, 7, ClickedNumber);
 
 }
 void MainWindow::on_Button18_clicked() {
-     OnButtonPress(1, 8, NrPrzycisku);
+     OnButtonPress(1, 8, ClickedNumber);
 }
 void MainWindow::on_Button19_clicked() {
-    OnButtonPress(1, 9, NrPrzycisku);
+    OnButtonPress(1, 9, ClickedNumber);
 }
 
 void MainWindow::on_Button21_clicked() {
-     OnButtonPress(2, 1, NrPrzycisku);
+     OnButtonPress(2, 1, ClickedNumber);
 }
 void MainWindow::on_Button22_clicked() {
-     OnButtonPress(2, 2, NrPrzycisku);
+     OnButtonPress(2, 2, ClickedNumber);
 }
 void MainWindow::on_Button23_clicked() {
-     OnButtonPress(2, 3, NrPrzycisku);
+     OnButtonPress(2, 3, ClickedNumber);
 }
 void MainWindow::on_Button24_clicked() {
-     OnButtonPress(2, 4, NrPrzycisku);
+     OnButtonPress(2, 4, ClickedNumber);
 }
 void MainWindow::on_Button25_clicked() {
-     OnButtonPress(2, 5, NrPrzycisku);
+     OnButtonPress(2, 5, ClickedNumber);
 }
 void MainWindow::on_Button26_clicked() {
-     OnButtonPress(2, 6, NrPrzycisku);
+     OnButtonPress(2, 6, ClickedNumber);
 }
 void MainWindow::on_Button27_clicked() {
-     OnButtonPress(2, 7, NrPrzycisku);
+     OnButtonPress(2, 7, ClickedNumber);
 }
 void MainWindow::on_Button28_clicked() {
-     OnButtonPress(2, 8, NrPrzycisku);
+     OnButtonPress(2, 8, ClickedNumber);
 }
 void MainWindow::on_Button29_clicked() {
-     OnButtonPress(2, 9, NrPrzycisku);
+     OnButtonPress(2, 9, ClickedNumber);
 }
 
 void MainWindow::on_Button31_clicked() {
-     OnButtonPress(3, 1, NrPrzycisku);
+     OnButtonPress(3, 1, ClickedNumber);
 }
 void MainWindow::on_Button32_clicked() {
-     OnButtonPress(3, 2, NrPrzycisku);
+     OnButtonPress(3, 2, ClickedNumber);
 }
 void MainWindow::on_Button33_clicked() {
-     OnButtonPress(3, 3, NrPrzycisku);
+     OnButtonPress(3, 3, ClickedNumber);
 }
 void MainWindow::on_Button34_clicked() {
-     OnButtonPress(3, 4, NrPrzycisku);
+     OnButtonPress(3, 4, ClickedNumber);
 }
 void MainWindow::on_Button35_clicked() {
-     OnButtonPress(3, 5, NrPrzycisku);
+     OnButtonPress(3, 5, ClickedNumber);
 }
 void MainWindow::on_Button36_clicked() {
-     OnButtonPress(3, 6, NrPrzycisku);
+     OnButtonPress(3, 6, ClickedNumber);
 }
 void MainWindow::on_Button37_clicked() {
-     OnButtonPress(3, 7, NrPrzycisku);
+     OnButtonPress(3, 7, ClickedNumber);
 }
 void MainWindow::on_Button38_clicked() {
-     OnButtonPress(3, 8, NrPrzycisku);
+     OnButtonPress(3, 8, ClickedNumber);
 }
 void MainWindow::on_Button39_clicked() {
-     OnButtonPress(3, 9, NrPrzycisku);
+     OnButtonPress(3, 9, ClickedNumber);
 }
 
 void MainWindow::on_Button41_clicked() {
-     OnButtonPress(4, 1, NrPrzycisku);
+     OnButtonPress(4, 1, ClickedNumber);
 }
 void MainWindow::on_Button42_clicked() {
-     OnButtonPress(4, 2, NrPrzycisku);
+     OnButtonPress(4, 2, ClickedNumber);
 }
 void MainWindow::on_Button43_clicked() {
-     OnButtonPress(4, 3, NrPrzycisku);
+     OnButtonPress(4, 3, ClickedNumber);
 }
 void MainWindow::on_Button44_clicked() {
-     OnButtonPress(4, 4, NrPrzycisku);
+     OnButtonPress(4, 4, ClickedNumber);
 }
 void MainWindow::on_Button45_clicked() {
-     OnButtonPress(4, 5, NrPrzycisku);
+     OnButtonPress(4, 5, ClickedNumber);
 }
 void MainWindow::on_Button46_clicked() {
-     OnButtonPress(4, 6, NrPrzycisku);
+     OnButtonPress(4, 6, ClickedNumber);
 }
 void MainWindow::on_Button47_clicked() {
-     OnButtonPress(4, 7, NrPrzycisku);
+     OnButtonPress(4, 7, ClickedNumber);
 }
 void MainWindow::on_Button48_clicked() {
-     OnButtonPress(4, 8, NrPrzycisku);
+     OnButtonPress(4, 8, ClickedNumber);
 }
 void MainWindow::on_Button49_clicked() {
-     OnButtonPress(4, 9, NrPrzycisku);
+     OnButtonPress(4, 9, ClickedNumber);
 }
 
 void MainWindow::on_Button51_clicked() {
-     OnButtonPress(5, 1, NrPrzycisku);
+     OnButtonPress(5, 1, ClickedNumber);
 }
 void MainWindow::on_Button52_clicked() {
-     OnButtonPress(5, 2, NrPrzycisku);
+     OnButtonPress(5, 2, ClickedNumber);
 }
 void MainWindow::on_Button53_clicked() {
-     OnButtonPress(5, 3, NrPrzycisku);
+     OnButtonPress(5, 3, ClickedNumber);
 }
 void MainWindow::on_Button54_clicked() {
-     OnButtonPress(5, 4, NrPrzycisku);
+     OnButtonPress(5, 4, ClickedNumber);
 }
 void MainWindow::on_Button55_clicked() {
-     OnButtonPress(5, 5, NrPrzycisku);
+     OnButtonPress(5, 5, ClickedNumber);
 }
 void MainWindow::on_Button56_clicked() {
-     OnButtonPress(5, 6, NrPrzycisku);
+     OnButtonPress(5, 6, ClickedNumber);
 }
 void MainWindow::on_Button57_clicked() {
-     OnButtonPress(5, 7, NrPrzycisku);
+     OnButtonPress(5, 7, ClickedNumber);
 }
 void MainWindow::on_Button58_clicked() {
-     OnButtonPress(5, 8, NrPrzycisku);
+     OnButtonPress(5, 8, ClickedNumber);
 }
 void MainWindow::on_Button59_clicked() {
-     OnButtonPress(5, 9, NrPrzycisku);
+     OnButtonPress(5, 9, ClickedNumber);
 }
 
 void MainWindow::on_Button61_clicked() {
-     OnButtonPress(6, 1, NrPrzycisku);
+     OnButtonPress(6, 1, ClickedNumber);
 }
 void MainWindow::on_Button62_clicked() {
-     OnButtonPress(6, 2, NrPrzycisku);
+     OnButtonPress(6, 2, ClickedNumber);
 }
 void MainWindow::on_Button63_clicked() {
-     OnButtonPress(6, 3, NrPrzycisku);
+     OnButtonPress(6, 3, ClickedNumber);
 }
 void MainWindow::on_Button64_clicked() {
-     OnButtonPress(6, 4, NrPrzycisku);
+     OnButtonPress(6, 4, ClickedNumber);
 }
 void MainWindow::on_Button65_clicked() {
-     OnButtonPress(6, 5, NrPrzycisku);
+     OnButtonPress(6, 5, ClickedNumber);
 }
 void MainWindow::on_Button66_clicked() {
-     OnButtonPress(6, 6, NrPrzycisku);
+     OnButtonPress(6, 6, ClickedNumber);
 }
 void MainWindow::on_Button67_clicked() {
-     OnButtonPress(6, 7, NrPrzycisku);
+     OnButtonPress(6, 7, ClickedNumber);
 }
 void MainWindow::on_Button68_clicked() {
-     OnButtonPress(6, 8, NrPrzycisku);
+     OnButtonPress(6, 8, ClickedNumber);
 }
 void MainWindow::on_Button69_clicked() {
-     OnButtonPress(6, 9, NrPrzycisku);
+     OnButtonPress(6, 9, ClickedNumber);
 }
 
 void MainWindow::on_Button71_clicked() {
-     OnButtonPress(7, 1, NrPrzycisku);
+     OnButtonPress(7, 1, ClickedNumber);
 }
 void MainWindow::on_Button72_clicked() {
-     OnButtonPress(7, 2, NrPrzycisku);
+     OnButtonPress(7, 2, ClickedNumber);
 }
 void MainWindow::on_Button73_clicked() {
-     OnButtonPress(7, 3, NrPrzycisku);
+     OnButtonPress(7, 3, ClickedNumber);
 }
 void MainWindow::on_Button74_clicked() {
-     OnButtonPress(7, 4, NrPrzycisku);
+     OnButtonPress(7, 4, ClickedNumber);
 }
 void MainWindow::on_Button75_clicked() {
-     OnButtonPress(7, 5, NrPrzycisku);
+     OnButtonPress(7, 5, ClickedNumber);
 }
 void MainWindow::on_Button76_clicked() {
-     OnButtonPress(7, 6, NrPrzycisku);
+     OnButtonPress(7, 6, ClickedNumber);
 }
 void MainWindow::on_Button77_clicked() {
-     OnButtonPress(7, 7, NrPrzycisku);
+     OnButtonPress(7, 7, ClickedNumber);
 }
 void MainWindow::on_Button78_clicked() {
-     OnButtonPress(7, 8, NrPrzycisku);
+     OnButtonPress(7, 8, ClickedNumber);
 }
 void MainWindow::on_Button79_clicked() {
-     OnButtonPress(7, 9, NrPrzycisku);
+     OnButtonPress(7, 9, ClickedNumber);
 }
 
 void MainWindow::on_Button81_clicked() {
-     OnButtonPress(8, 1, NrPrzycisku);
+     OnButtonPress(8, 1, ClickedNumber);
 }
 void MainWindow::on_Button82_clicked() {
-     OnButtonPress(8, 2, NrPrzycisku);
+     OnButtonPress(8, 2, ClickedNumber);
 }
 void MainWindow::on_Button83_clicked() {
-     OnButtonPress(8, 3, NrPrzycisku);
+     OnButtonPress(8, 3, ClickedNumber);
 }
 void MainWindow::on_Button84_clicked() {
-     OnButtonPress(8, 4, NrPrzycisku);
+     OnButtonPress(8, 4, ClickedNumber);
 }
 void MainWindow::on_Button85_clicked() {
-     OnButtonPress(8, 5, NrPrzycisku);
+     OnButtonPress(8, 5, ClickedNumber);
 }
 void MainWindow::on_Button86_clicked() {
-     OnButtonPress(8, 6, NrPrzycisku);
+     OnButtonPress(8, 6, ClickedNumber);
 }
 void MainWindow::on_Button87_clicked() {
-     OnButtonPress(8, 7, NrPrzycisku);
+     OnButtonPress(8, 7, ClickedNumber);
 }
 void MainWindow::on_Button88_clicked() {
-     OnButtonPress(8, 8, NrPrzycisku);
+     OnButtonPress(8, 8, ClickedNumber);
 }
 void MainWindow::on_Button89_clicked() {
-     OnButtonPress(8, 9, NrPrzycisku);
+     OnButtonPress(8, 9, ClickedNumber);
 }
 
 void MainWindow::on_Button91_clicked() {
-     OnButtonPress(9, 1, NrPrzycisku);
+     OnButtonPress(9, 1, ClickedNumber);
 }
 void MainWindow::on_Button92_clicked() {
-     OnButtonPress(9, 2, NrPrzycisku);
+     OnButtonPress(9, 2, ClickedNumber);
 }
 void MainWindow::on_Button93_clicked() {
-     OnButtonPress(9, 3, NrPrzycisku);
+     OnButtonPress(9, 3, ClickedNumber);
 }
 void MainWindow::on_Button94_clicked() {
-     OnButtonPress(9, 4, NrPrzycisku);
+     OnButtonPress(9, 4, ClickedNumber);
 }
 void MainWindow::on_Button95_clicked() {
-     OnButtonPress(9, 5, NrPrzycisku);
+     OnButtonPress(9, 5, ClickedNumber);
 }
 void MainWindow::on_Button96_clicked() {
-     OnButtonPress(9, 6, NrPrzycisku);
+     OnButtonPress(9, 6, ClickedNumber);
 }
 void MainWindow::on_Button97_clicked() {
-     OnButtonPress(9, 7, NrPrzycisku);
+     OnButtonPress(9, 7, ClickedNumber);
 }
 void MainWindow::on_Button98_clicked() {
-    OnButtonPress(9, 8, NrPrzycisku);
+    OnButtonPress(9, 8, ClickedNumber);
 }
 void MainWindow::on_Button99_clicked() {
-    OnButtonPress(9, 9, NrPrzycisku);
+    OnButtonPress(9, 9, ClickedNumber);
 }
