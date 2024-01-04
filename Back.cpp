@@ -30,7 +30,6 @@ void back::DrawNumber(int count)
 
 }
 
-
 bool back::IsSafe(int row, int col, int num)
 {
     //sprawdzenie czy w wylosowanym miejscu nie ma juz liczby
