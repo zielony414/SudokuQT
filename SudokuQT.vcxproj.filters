@@ -43,7 +43,10 @@
     <ClCompile Include="Back.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Wynik.cpp">
+    <ClCompile Include="WynikGry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Wyniki.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -51,9 +54,12 @@
     <ClInclude Include="Back.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Wyniki.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="Wynik.h">
+    <QtMoc Include="WynikGry.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

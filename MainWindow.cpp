@@ -1,5 +1,5 @@
 ﻿#include "MainWindow.h"
-#include "Wynik.h"
+
 
 
 /*----------------------Inicjalizacja----------------------*/
@@ -39,8 +39,8 @@ MainWindow::MainWindow(QWidget* parent)
 
     Liczby.resize(9, 0);
 
-    connect(&wynik, SIGNAL(aktualizujCzasGry(std::string)), this, SLOT(aktualizujCzasGry(std::string)), Qt::UniqueConnection);
-    connect(&wynik, SIGNAL(aktualizujPunkty(int)), this, SLOT(aktualizujPunkty(int)), Qt::UniqueConnection);
+    connect(&wynik_gry, SIGNAL(aktualizujCzasGry(std::string)), this, SLOT(aktualizujCzasGry(std::string)), Qt::UniqueConnection);
+    connect(&wynik_gry, SIGNAL(aktualizujPunkty(int)), this, SLOT(aktualizujPunkty(int)), Qt::UniqueConnection);
 
 
 
@@ -78,7 +78,7 @@ void MainWindow::ClearTable()
 {
     RevertColour();
     Backend.Clear();
-    wynik.ClearData();
+    wynik_gry.ClearData();
     std::fill(Liczby.begin(), Liczby.end(), 0);
 
     ui.WiadomoscGraLbl->setText("");
@@ -88,7 +88,12 @@ void MainWindow::ClearTable()
     for (int i = 0; i < 9; i++) {
         NumberButtons[i]->setEnabled(true);
         NumberButtons[i]->setStyleSheet(StylAktywnych);
+        for (int j = 0; j < 9; j++) {
+            board[i][j] = 0;
+            BoardButtons[i][j]->setText("");
+        }
     }
+
 }
 
 void MainWindow::FillTable(int Board[9][9]) {
@@ -236,32 +241,47 @@ bool MainWindow::OnButtonPress(int x, int y, int num)
 
     RevertColour();
 
-    if (Backend.IsCorrect(x, y, num))
+    if (CreatingSudoku == false) 
+    {
+        if (Backend.IsCorrect(x, y, num))
+        {
+            BoardButtons[x][y]->setText(QString::number(ClickedNumber));
+            ClickedBoardNumber = BoardButtons[x][y]->text().toInt();
+            HighlightTable(x, y, ClickedBoardNumber);
+            AddToCounter(ClickedBoardNumber);
+            Backend.Insert(x, y, num);
+            wynik_gry.AddPoints(Backend.GetTable(), x, y);
+            return true;
+        }
+        else 
+        {
+            ClickedBoardNumber = BoardButtons[x][y]->text().toInt();
+            HighlightTable(x, y, ClickedBoardNumber);
+            if (ClickedBoardNumber == 0) wynik_gry.AddMinus();
+            return false;
+        }
+    }
+    else 
     {
         BoardButtons[x][y]->setText(QString::number(ClickedNumber));
         ClickedBoardNumber = BoardButtons[x][y]->text().toInt();
         HighlightTable(x, y, ClickedBoardNumber);
         AddToCounter(ClickedBoardNumber);
         Backend.Insert(x, y, num);
-        wynik.CalculateBonuses(Backend.GetTable(), x, y);
         return true;
     }
-    else {
-        ClickedBoardNumber = BoardButtons[x][y]->text().toInt();
-        HighlightTable(x, y, ClickedBoardNumber);
-        if(ClickedBoardNumber == 0) wynik.AddMinus();
-        return false;
-    }
+
+    
 }
 
 void MainWindow::EndGame()
 {
-    wynik.StopTimer();
+    wynik_gry.StopTimer();
     ui.WiadomoscGraLbl->setText("Gratulacje! Rozwiązałeś sudoku");
 
     if (NazwaUzytkownika != "")
     {
-        wynik.ExportScore(NazwaUzytkownika, Trudnosc);
+        wyniki.ExportScore(NazwaUzytkownika, wynik_gry.GetScore(), Trudnosc);
     }
 }
 
@@ -269,12 +289,22 @@ void MainWindow::EndGame()
 /*------------------------Główne menu------------------------*/
 void MainWindow::on_GrajButton_clicked() 
 {
+    CreatingSudoku = false;
     ui.MenuWidget->setVisible(false);
     ui.LvlWidget->setVisible(true);
 };
 
 void MainWindow::on_StworzButton_clicked()
 {
+    CreatingSudoku = true;
+    for (int i = 0; i < 9; i++) {
+        for (int j = 0; j < 9; j++) {
+            board[i][j] = 0;
+        }
+    }
+
+
+
     ui.MenuWidget->setVisible(false);
     ui.WypelnijWidget->setVisible(true);
     ui.PlanszaWidget->setVisible(true);
@@ -290,6 +320,15 @@ void MainWindow::on_UzytkownikButton_clicked()
 
 void MainWindow::on_WynikiButton_clicked()
 {
+    ui.WynikiText->clear();
+    std::vector Scoreboard = wyniki.ImportScore();
+    ui.WynikiText->setAlignment(Qt::AlignLeft);
+    ui.WynikiText->append("<p>\n</p>");
+
+    for (size_t i = 0; i < Scoreboard.size(); ++i) {
+        ui.WynikiText->append("<p align='center'>" + QString::number(i+1) + "\t" + QString::fromStdString(Scoreboard[i]) + "</p>");
+    }
+
     ui.MenuWidget->setVisible(false);
     ui.TabelaWynWidget->setVisible(true);
 }
@@ -317,7 +356,7 @@ void MainWindow::on_Lvl1Button_clicked()
     ui.GameWidget->setVisible(true);
     ui.PlanszaWidget->setVisible(true);
     HighlightNumbers(ClickedNumber);
-    wynik.StartTimer();
+    wynik_gry.StartTimer();
 }
 
 void MainWindow::on_Lvl2Button_clicked()
@@ -337,7 +376,7 @@ void MainWindow::on_Lvl2Button_clicked()
     ui.GameWidget->setVisible(true);
     ui.PlanszaWidget->setVisible(true);
     HighlightNumbers(ClickedNumber);
-    wynik.StartTimer();
+    wynik_gry.StartTimer();
 }
 
 void MainWindow::on_Lvl3Button_clicked()
@@ -357,7 +396,7 @@ void MainWindow::on_Lvl3Button_clicked()
     ui.GameWidget->setVisible(true);
     ui.PlanszaWidget->setVisible(true);
     HighlightNumbers(ClickedNumber);
-    wynik.StartTimer();
+    wynik_gry.StartTimer();
 }
 
 
@@ -401,7 +440,8 @@ void MainWindow::on_NieZmieniajNazwyBtn_clicked() {
 
 /*-----------------------Panel gry w sudoku-----------------------*/
 void MainWindow::on_PodpowiedzButton_clicked() {
-    
+    wynik_gry.AddMinus(40);
+
 }
 
 void MainWindow::on_PorzucGreButton_clicked() 
@@ -425,17 +465,34 @@ void MainWindow::on_WyjdzWypelnij_clicked()
 
 void MainWindow::on_RozwiazSudoku_clicked() 
 {
+    bool CzyRozwiazane = Backend.SolveInput();
 
+    if (CzyRozwiazane == true) 
+    {
+        for (int i = 0; i < 9; ++i) {
+            for (int j = 0; j < 9; ++j) {
+                board[i][j] = Backend.Retrive(i, j);
+            }
+        }
+
+        FillTable(board);
+    }
+    else 
+    {
+        ui.WynikWypelnieniaLbl->setText("Plansza nie jest możliwa do rozwiązania");
+    }
 }
 
 void MainWindow::on_WyczyscSudoku_clicked() 
 {
-
+    ClearTable();
+    FillTable(board);
 }
 
 
 /*-------------------------Panel wyników-------------------------*/
 void MainWindow::on_WyjdzWynikiButton_clicked() {
+    
     ui.TabelaWynWidget->setVisible(false);
     ui.MenuWidget->setVisible(true);
 }

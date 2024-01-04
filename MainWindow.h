@@ -3,7 +3,8 @@
 #include <QtWidgets/QMainWindow>
 #include "ui_MainWindow.h"
 #include "Back.h"
-#include "Wynik.h"
+#include "WynikGry.h"
+#include "Wyniki.h"
 #include <vector>
 #include <iostream>
 #include <string>
@@ -13,7 +14,7 @@
 
 
 
-class Wynik;
+class WynikGry;
 
 class MainWindow : public QMainWindow
 {
@@ -26,8 +27,9 @@ public:
 private:
     Ui::MainWindowClass ui;
 
-    Wynik wynik;
+    WynikGry wynik_gry;
     back Backend;
+    Wyniki wyniki;
 
     std::string NazwaUzytkownika;
     std::string Trudnosc;
@@ -39,6 +41,7 @@ private:
     QVector<QVector<QPushButton*>> BoardButtons;
     QVector<QRadioButton*> NumberButtons;
     int board[9][9] = {0};
+    bool CreatingSudoku = false;
 
 
     const char* StylNieaktywnych;

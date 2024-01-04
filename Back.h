@@ -17,6 +17,7 @@ public:
 	bool IsDeletable(int x, int y);
 	int(&GetTable())[9][9];
 	int Play(int poziomTrud);
+	bool SolveInput();
 
 
 private:

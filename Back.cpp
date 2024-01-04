@@ -183,6 +183,13 @@ int back::Play(int poziomTrud)
 
 }
 
+bool back::SolveInput()
+{
+    bool wyn = SudokuSolver(Board);
+
+    return wyn;
+}
+
 bool back::SudokuSolver(int Table[9][9])
 {
     int row, col;

@@ -1,33 +1,23 @@
-﻿#include "Wynik.h"
+﻿#include "WynikGry.h"
 
-Wynik::Wynik(QObject* parent) : QObject(parent), Sec(0), Min(0), score(0) {
+WynikGry::WynikGry(QObject* parent) : QObject(parent), Sec(0), Min(0), score(0) {
     timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, this, &Wynik::updateTimer);
+    connect(timer, &QTimer::timeout, this, &WynikGry::updateTimer);
 }
 
-std::string Wynik::GetTime()
-{
-    return czas;
-}
-
-void Wynik::StartTimer() {
+void WynikGry::StartTimer() {
     Sec = 0;
     timer->start(1000); // Uruchamia timer z interwałem 1 sekundy.
 }
 
-void Wynik::StopTimer() {
+void WynikGry::StopTimer() {
     timer->stop();
     Min = 0;
     Sec = 0;
 }
 
-int Wynik::GetScore()
-{
-    return score;
-}
 
-
-void Wynik::CalculateBonuses(int Board[9][9], int x, int y)
+void WynikGry::AddPoints(int Board[9][9], int x, int y)
 {
     double points = 10;
     int row = 0;
@@ -75,9 +65,9 @@ void Wynik::CalculateBonuses(int Board[9][9], int x, int y)
     emit aktualizujPunkty(score);
 }
 
-void Wynik::AddMinus()
+void WynikGry::AddMinus(double points = 20)
 {
-    double points = 10;
+    points = 20;
     double modifier = 1.2;
     ++NrOfMistakes;
     
@@ -94,7 +84,7 @@ void Wynik::AddMinus()
     emit aktualizujPunkty(score);
 }
 
-void Wynik::ClearData()
+void WynikGry::ClearData()
 {
     score = 0;
     Sec = 0;
@@ -102,38 +92,12 @@ void Wynik::ClearData()
     NrOfMistakes = 0;
 }
 
-bool Wynik::ExportScore(std::string NazwaUzytkownika, std::string Trudnosc)
+int WynikGry::GetScore()
 {
-    std::time_t czas = std::time(nullptr);
-    std::tm* dataCzas = std::localtime(&czas);
-
-    // Wyświetlenie daty w formacie "DD.MM.RRRR"
-    int dzien = dataCzas->tm_mday;
-    int miesiac = dataCzas->tm_mon + 1; // tm_mon liczy miesiące od 0 do 11
-    int rok = dataCzas->tm_year + 1900;
-
-    std::string Czas = std::to_string(dzien) + "." + std::to_string(miesiac) + "." + std::to_string(rok);
-
-    std::string Export = NazwaUzytkownika + ";" + std::to_string(score) + ";" + Trudnosc + ";" + Czas;
-
-    const std::string nazwaPliku = "WynikiSudoku.txt";
-
-    // Otwarcie pliku w trybie do zapisu (dodawania do istniejącego pliku lub tworzenia nowego)
-    std::ofstream plik(nazwaPliku, std::ios::app);
-
-    if (plik.is_open()) 
-    {
-        plik << Export << std::endl;
-        plik.close();
-        return true;
-    }
-    else 
-    {
-        return false;
-    }
+    return score;
 }
 
-void Wynik::updateTimer() {
+void WynikGry::updateTimer() {
     Sec++;
     if (Sec == 60) {
         Sec = 0;
@@ -148,3 +112,4 @@ void Wynik::updateTimer() {
 
     emit aktualizujCzasGry(czas);
 }
+

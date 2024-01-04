@@ -5,22 +5,19 @@
 #include <QTimer>
 #include <QString>
 #include <string>
-#include <ctime>
-#include <fstream>
 
-class Wynik : public QObject {
+class WynikGry : public QObject {
     Q_OBJECT
 
 public:
-    explicit Wynik(QObject* parent = nullptr);
-    std::string GetTime();
+    explicit WynikGry(QObject* parent = nullptr);
     void StartTimer();
     void StopTimer();
-    int GetScore();
-    void CalculateBonuses(int Board[9][9], int x, int y);
-    void AddMinus();
+    void AddPoints(int Board[9][9], int x, int y);
+    void AddMinus(double points = 20);
     void ClearData();
-    bool ExportScore(std::string NazwaUzytkownika, std::string Trudnosc);
+    int GetScore();
+    
 
 signals:
     void aktualizujCzasGry(std::string czas);
