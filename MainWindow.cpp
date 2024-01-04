@@ -257,7 +257,7 @@ bool MainWindow::OnButtonPress(int x, int y, int num)
         {
             ClickedBoardNumber = BoardButtons[x][y]->text().toInt();
             HighlightTable(x, y, ClickedBoardNumber);
-            if (ClickedBoardNumber == 0) wynik_gry.AddMinus();
+            if (ClickedBoardNumber == 0) wynik_gry.AddMinus(20);
             return false;
         }
     }
@@ -278,6 +278,7 @@ void MainWindow::EndGame()
 {
     wynik_gry.StopTimer();
     ui.WiadomoscGraLbl->setText("Gratulacje! Rozwiązałeś sudoku");
+    ui.PodpowiedzButton->setEnabled(false);
 
     if (NazwaUzytkownika != "")
     {
@@ -290,6 +291,7 @@ void MainWindow::EndGame()
 void MainWindow::on_GrajButton_clicked() 
 {
     CreatingSudoku = false;
+    ui.PodpowiedzButton->setEnabled(true);
     ui.MenuWidget->setVisible(false);
     ui.LvlWidget->setVisible(true);
 };
@@ -343,7 +345,7 @@ void MainWindow::on_Lvl1Button_clicked()
 
     for (int i = 0; i < 9; ++i) {
         for (int j = 0; j < 9; ++j) {
-            board[i][j] = Backend.Retrive(i, j);
+            board[i][j] = Backend.Retrive(i, j, 0);
         }
     }
 
@@ -367,7 +369,7 @@ void MainWindow::on_Lvl2Button_clicked()
 
     for (int i = 0; i < 9; ++i) {
         for (int j = 0; j < 9; ++j) {
-            board[i][j] = Backend.Retrive(i, j);
+            board[i][j] = Backend.Retrive(i, j, 0);
         }
     }
 
@@ -387,7 +389,7 @@ void MainWindow::on_Lvl3Button_clicked()
 
     for (int i = 0; i < 9; ++i) {
         for (int j = 0; j < 9; ++j) {
-            board[i][j] = Backend.Retrive(i, j);
+            board[i][j] = Backend.Retrive(i, j, 0);
         }
     }
 
@@ -442,6 +444,37 @@ void MainWindow::on_NieZmieniajNazwyBtn_clicked() {
 void MainWindow::on_PodpowiedzButton_clicked() {
     wynik_gry.AddMinus(40);
 
+    srand(time(NULL));
+
+    int randX = (std::rand() % 9);
+    int randY = (std::rand() % 9);
+
+    while(true) {
+
+        if (board[randX][randY] == 0) {
+            int number = Backend.Retrive(randX, randY, 1);
+
+            RevertColour();
+
+            BoardButtons[randX][randY]->setText(QString::number(number));
+            BoardButtons[randX][randY]->setStyleSheet("background-color: #a9add1;");
+            AddToCounter(number);
+            Backend.Insert(randX, randY, number);
+            board[randX][randY] = number;
+            break;
+        }
+        
+        randX++;
+        if (randX > 8) {
+            randY++;
+            randX = 0;
+        }
+        
+        if (randY > 8) {
+            randY = 0;
+        }
+    } 
+
 }
 
 void MainWindow::on_PorzucGreButton_clicked() 
@@ -471,7 +504,7 @@ void MainWindow::on_RozwiazSudoku_clicked()
     {
         for (int i = 0; i < 9; ++i) {
             for (int j = 0; j < 9; ++j) {
-                board[i][j] = Backend.Retrive(i, j);
+                board[i][j] = Backend.Retrive(i, j, 0);
             }
         }
 

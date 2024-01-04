@@ -1,7 +1,5 @@
 ﻿#include "Back.h"
-#include <cstdlib>
-#include <ctime>
-#include <iostream>
+
 
 using namespace std;
 
@@ -105,9 +103,15 @@ void back::Delete(int row, int col)
     Board[row][col] = 0;
 }
 
-int back::Retrive(int row, int col)
+int back::Retrive(int row, int col, int boardNr)
 {
-    return Board[row][col];
+    if (boardNr == 0) {
+        return Board[row][col];
+    }
+    else {
+        return DoneBoard[row][col];
+    }
+    
 }
 
 bool back::IsDeletable(int x, int y)

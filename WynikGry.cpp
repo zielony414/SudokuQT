@@ -65,9 +65,8 @@ void WynikGry::AddPoints(int Board[9][9], int x, int y)
     emit aktualizujPunkty(score);
 }
 
-void WynikGry::AddMinus(double points = 20)
+void WynikGry::AddMinus(double points)
 {
-    points = 20;
     double modifier = 1.2;
     ++NrOfMistakes;
     
@@ -78,8 +77,11 @@ void WynikGry::AddMinus(double points = 20)
         i++;
     }
     
-    
     score = score - points;
+
+    if (score < -500) {
+        score = -500;
+    }
 
     emit aktualizujPunkty(score);
 }

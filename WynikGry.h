@@ -14,7 +14,7 @@ public:
     void StartTimer();
     void StopTimer();
     void AddPoints(int Board[9][9], int x, int y);
-    void AddMinus(double points = 20);
+    void AddMinus(double points);
     void ClearData();
     int GetScore();
     
