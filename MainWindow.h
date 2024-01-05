@@ -2,7 +2,7 @@
 
 #include <QtWidgets/QMainWindow>
 #include "ui_MainWindow.h"
-#include "Back.h"
+#include "Board.h"
 #include "WynikGry.h"
 #include "Wyniki.h"
 #include <vector>

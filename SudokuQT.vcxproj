@@ -94,12 +94,12 @@
     <QtRcc Include="MainWindow.qrc" />
     <QtUic Include="MainWindow.ui" />
     <QtMoc Include="MainWindow.h" />
-    <ClCompile Include="Back.cpp" />
+    <ClCompile Include="Board.cpp" />
     <ClCompile Include="MainWindow.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Back.h" />
+    <ClInclude Include="Board.h" />
     <ClInclude Include="Wyniki.h" />
     <QtMoc Include="WynikGry.h" />
   </ItemGroup>

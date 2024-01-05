@@ -261,7 +261,7 @@ bool MainWindow::OnButtonPress(int x, int y, int num)
             return false;
         }
     }
-    else 
+    else if(Backend.IsSafe(x,y,num))
     {
         BoardButtons[x][y]->setText(QString::number(ClickedNumber));
         ClickedBoardNumber = BoardButtons[x][y]->text().toInt();
@@ -269,6 +269,13 @@ bool MainWindow::OnButtonPress(int x, int y, int num)
         AddToCounter(ClickedBoardNumber);
         Backend.Insert(x, y, num);
         return true;
+    }
+    else
+    {
+        ClickedBoardNumber = BoardButtons[x][y]->text().toInt();
+        HighlightTable(x, y, ClickedBoardNumber);
+        if (ClickedBoardNumber == 0) wynik_gry.AddMinus(20);
+        return false;
     }
 
     
@@ -305,6 +312,7 @@ void MainWindow::on_StworzButton_clicked()
         }
     }
 
+    Backend.BlankBoard();
 
 
     ui.MenuWidget->setVisible(false);

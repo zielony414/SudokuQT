@@ -11,17 +11,17 @@
 class Wyniki
 {
 public:
+    bool ExportScore(const std::string& NazwaUzytkownika, int Wynik, const std::string& Trudnosc);
+    const std::vector < std::string > ImportScore();
+
+private:
     struct PlayerScore {
         std::string nazwaUzytkownika;
         std::string wynik;
         std::string poziomTrudnosci;
         std::string czas;
     };
-    
-    bool ExportScore(std::string NazwaUzytkownika, int Wynik, std::string Trudnosc);
-    std::vector < std::string > ImportScore();
 
-private:
     void convertToStr();
     std::vector<PlayerScore> Scoreboard;
     std::vector<std::string> ScoreboardConverted;

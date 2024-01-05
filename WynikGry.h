@@ -1,6 +1,4 @@
-﻿#ifndef WYNIK_H
-#define WYNIK_H
-
+﻿#pragma once
 #include <QObject>
 #include <QTimer>
 #include <QString>
@@ -16,15 +14,8 @@ public:
     void AddPoints(int Board[9][9], int x, int y);
     void AddMinus(double points);
     void ClearData();
-    int GetScore();
+    int GetScore() const;
     
-
-signals:
-    void aktualizujCzasGry(std::string czas);
-    void aktualizujPunkty(int points);
-
-private slots:
-    void updateTimer();
 
 private:
     QTimer* timer;
@@ -33,6 +24,13 @@ private:
     int NrOfMistakes = 0;
     double score;
     std::string czas;
-};
 
-#endif // WYNIK_H
+signals:
+    void aktualizujCzasGry(std::string czas);
+    void aktualizujPunkty(int points);
+
+private slots:
+    void updateTimer();
+
+
+};
