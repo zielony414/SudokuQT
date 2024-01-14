@@ -35,7 +35,8 @@
    <string>Sudoku</string>
   </property>
   <property name="windowIcon">
-   <iconset theme="applications-graphics"/>
+   <iconset>
+    <normaloff>../logo.png</normaloff>../logo.png</iconset>
   </property>
   <property name="dockOptions">
    <set>QMainWindow::AllowTabbedDocks|QMainWindow::AnimatedDocks</set>
@@ -4078,7 +4079,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <property name="styleSheet">
      <string notr="true">.QWidget {
 background-image: url(./tlo.jpg)
-}</string>
+}
+</string>
     </property>
     <layout class="QGridLayout" name="gridLayout">
      <property name="leftMargin">
@@ -5396,15 +5398,15 @@ border-color: #4c4;
      </item>
     </layout>
    </widget>
+   <zorder>GameWidget</zorder>
    <zorder>TabelaWynWidget</zorder>
    <zorder>PlanszaWidget</zorder>
-   <zorder>GameWidget</zorder>
    <zorder>LvlWidget</zorder>
-   <zorder>MenuWidget</zorder>
    <zorder>UzytkownikWidget</zorder>
    <zorder>plainTextEdit</zorder>
    <zorder>UzytkownikLabel</zorder>
    <zorder>WypelnijWidget</zorder>
+   <zorder>MenuWidget</zorder>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>

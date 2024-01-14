@@ -6,43 +6,10 @@
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
 {
-    StylNieaktywnych =
-        "QRadioButton{display: inline-block;"
-        "background-color: #b1b1b1;"
-        "font-size: 18px;"
-        "border: 2px solid #444;"
-        "border-radius: 4px;"
-        "padding: 8px 20px;}"
-        "QRadioButton::indicator{"
-        "opacity : 0;"
-        "position: fixed;"
-        "width : 0;}";
-
-    StylAktywnych =
-        "QRadioButton{display: inline-block;"
-        "background-color: #ddd;"
-        "padding:10px 20px;"
-        "font-size:18px;"
-        "border: 2px solid #444;"
-        "border-radius:4px;}"
-        "QRadioButton:hover{"
-        "background-color:#dfd;}"
-        "QRadioButton::indicator{"
-        "opacity:0;"
-        "position: fixed;"
-        "width:0;}"
-        "QRadioButton::pressed{"
-        "border:2px dashed #444;}"
-        "QRadioButton::checked{"
-        "background-color: #bfb;"
-        "border-color: #4c4;}";
-
     Liczby.resize(9, 0);
 
-    connect(&wynik_gry, SIGNAL(aktualizujCzasGry(std::string)), this, SLOT(aktualizujCzasGry(std::string)), Qt::UniqueConnection);
-    connect(&wynik_gry, SIGNAL(aktualizujPunkty(int)), this, SLOT(aktualizujPunkty(int)), Qt::UniqueConnection);
-
-
+    connect(&game_score, SIGNAL(aktualizujCzasGry(std::string)), this, SLOT(aktualizujCzasGry(std::string)), Qt::UniqueConnection);
+    connect(&game_score, SIGNAL(aktualizujPunkty(int)), this, SLOT(aktualizujPunkty(int)), Qt::UniqueConnection);
 
     ui.setupUi(this);
     ui.LvlWidget->setVisible(false);
@@ -54,12 +21,29 @@ MainWindow::MainWindow(QWidget* parent)
     ui.WypelnijWidget->setVisible(false);
     ui.plainTextEdit->setVisible(false);
     ui.NieZmieniajNazwyBtn->setVisible(false);
-    InitializeNumberButtons();
-    InitializeBoardButtons();
-}
+ 
 
-MainWindow::~MainWindow()
-{
+    // Zapełnienie tablicy z przyciskami z planszy
+    for (int i = 1; i < 10; i++) {
+
+        // Zapełnienie tablicy z przyciskami do wyboru numeru
+        QString buttonName = "nr" + QString::number(i) + "Btn";
+        QRadioButton* button = findChild<QRadioButton*>(buttonName);
+
+        // Dodaj przycisk do wektora 
+        NumberButtons.push_back(button);
+
+        QVector<QPushButton*> rowButtons;  // Przyciski w danym rzędzie
+        for (int j = 1; j < 10; j++) {
+            QString buttonName = "Button" + QString::number(i) + QString::number(j);
+            QPushButton* button = findChild<QPushButton*>(buttonName);
+
+            // Dodaj przycisk do wektora reprezentującego rzęd
+            rowButtons.push_back(button);
+        }
+        // Dodaj wektor reprezentujący rzęd do wektora reprezentującego całą tablicę
+        BoardButtons.push_back(rowButtons);
+    }
 }
 
 void MainWindow::aktualizujCzasGry(std::string czas) 
@@ -77,8 +61,8 @@ void MainWindow::aktualizujPunkty(int points)
 void MainWindow::ClearTable()
 {
     RevertColour();
-    Backend.Clear();
-    wynik_gry.ClearData();
+    board.Clear();
+    game_score.ClearData();
     std::fill(Liczby.begin(), Liczby.end(), 0);
 
     ui.WiadomoscGraLbl->setText("");
@@ -89,7 +73,7 @@ void MainWindow::ClearTable()
         NumberButtons[i]->setEnabled(true);
         NumberButtons[i]->setStyleSheet(StylAktywnych);
         for (int j = 0; j < 9; j++) {
-            board[i][j] = 0;
+            PlayingBoard[i][j] = 0;
             BoardButtons[i][j]->setText("");
         }
     }
@@ -178,6 +162,7 @@ void MainWindow::RevertColour() {
 }
 
 
+
 /*-------------Funkcje działające na przyciskach-------------*/
 void MainWindow::AddToCounter(int number) {
 
@@ -205,34 +190,6 @@ void MainWindow::AddToCounter(int number) {
     }
 }
 
-void MainWindow::InitializeBoardButtons()
-{
-    // Przechowuje wskaźniki do przycisków znalezionych w pierwszej pętli
-    for (int i = 1; i < 10; i++) {
-        QVector<QPushButton*> rowButtons;  // Przyciski w danym rzędzie
-        for (int j = 1; j < 10; j++) {
-            QString buttonName = "Button" + QString::number(i) + QString::number(j);
-            QPushButton* button = findChild<QPushButton*>(buttonName);
-
-            // Dodaj przycisk do wektora reprezentującego rzęd
-            rowButtons.push_back(button);
-        }
-        // Dodaj wektor reprezentujący rzęd do wektora reprezentującego całą tablicę
-        BoardButtons.push_back(rowButtons);
-    }
-}
-
-void MainWindow::InitializeNumberButtons()
-{
-    for (int i = 1; i < 10; i++) {
-        QString buttonName = "nr" + QString::number(i) + "Btn";
-        QRadioButton* button = findChild<QRadioButton*>(buttonName);
-
-        // Dodaj przycisk do wektora 
-        NumberButtons.push_back(button);
-    }
-}
-
 bool MainWindow::OnButtonPress(int x, int y, int num)
 {
     // Konwersja na przedział 0 - 8
@@ -243,38 +200,39 @@ bool MainWindow::OnButtonPress(int x, int y, int num)
 
     if (CreatingSudoku == false) 
     {
-        if (Backend.IsCorrect(x, y, num))
+        if (board.IsCorrect(x, y, num))
         {
             BoardButtons[x][y]->setText(QString::number(ClickedNumber));
             ClickedBoardNumber = BoardButtons[x][y]->text().toInt();
             HighlightTable(x, y, ClickedBoardNumber);
             AddToCounter(ClickedBoardNumber);
-            Backend.Insert(x, y, num);
-            wynik_gry.AddPoints(Backend.GetTable(), x, y);
+            PlayingBoard[x][y] = num;
+            board.Insert(x, y, num);
+            game_score.AddPoints(board.GetTable(), x, y);
             return true;
         }
         else 
         {
             ClickedBoardNumber = BoardButtons[x][y]->text().toInt();
             HighlightTable(x, y, ClickedBoardNumber);
-            if (ClickedBoardNumber == 0) wynik_gry.AddMinus(20);
+            if (ClickedBoardNumber == 0) game_score.AddMinus(20);
             return false;
         }
     }
-    else if(Backend.IsSafe(x,y,num))
+    else if(board.IsSafe(x,y,num))
     {
         BoardButtons[x][y]->setText(QString::number(ClickedNumber));
         ClickedBoardNumber = BoardButtons[x][y]->text().toInt();
         HighlightTable(x, y, ClickedBoardNumber);
         AddToCounter(ClickedBoardNumber);
-        Backend.Insert(x, y, num);
+        board.Insert(x, y, num);
         return true;
     }
     else
     {
         ClickedBoardNumber = BoardButtons[x][y]->text().toInt();
         HighlightTable(x, y, ClickedBoardNumber);
-        if (ClickedBoardNumber == 0) wynik_gry.AddMinus(20);
+        if (ClickedBoardNumber == 0) game_score.AddMinus(20);
         return false;
     }
 
@@ -283,18 +241,19 @@ bool MainWindow::OnButtonPress(int x, int y, int num)
 
 void MainWindow::EndGame()
 {
-    wynik_gry.StopTimer();
+    game_score.StopTimer();
     ui.WiadomoscGraLbl->setText("Gratulacje! Rozwiązałeś sudoku");
     ui.PodpowiedzButton->setEnabled(false);
 
     if (NazwaUzytkownika != "")
     {
-        wyniki.ExportScore(NazwaUzytkownika, wynik_gry.GetScore(), Trudnosc);
+        scores.ExportScore(NazwaUzytkownika, game_score.GetScore(), Trudnosc);
     }
 }
 
 
-/*------------------------Główne menu------------------------*/
+
+/*------------------------ Przyciski głównego menu ------------------------*/
 void MainWindow::on_GrajButton_clicked() 
 {
     CreatingSudoku = false;
@@ -308,11 +267,11 @@ void MainWindow::on_StworzButton_clicked()
     CreatingSudoku = true;
     for (int i = 0; i < 9; i++) {
         for (int j = 0; j < 9; j++) {
-            board[i][j] = 0;
+            PlayingBoard[i][j] = 0;
         }
     }
 
-    Backend.BlankBoard();
+    board.Clear();
 
 
     ui.MenuWidget->setVisible(false);
@@ -331,7 +290,7 @@ void MainWindow::on_UzytkownikButton_clicked()
 void MainWindow::on_WynikiButton_clicked()
 {
     ui.WynikiText->clear();
-    std::vector Scoreboard = wyniki.ImportScore();
+    std::vector Scoreboard = scores.ImportScore();
     ui.WynikiText->setAlignment(Qt::AlignLeft);
     ui.WynikiText->append("<p>\n</p>");
 
@@ -344,21 +303,22 @@ void MainWindow::on_WynikiButton_clicked()
 }
 
 
-/*---------------------Menu wyboru poziomu---------------------*/
+
+/*--------------------- Przyciski menu wyboru poziomu ---------------------*/
 void MainWindow::on_Lvl1Button_clicked()
 {
-    Backend.Play(1);
+    board.Play(1);
     Trudnosc = "Łatwy";
 
 
     for (int i = 0; i < 9; ++i) {
         for (int j = 0; j < 9; ++j) {
-            board[i][j] = Backend.Retrive(i, j, 0);
+            PlayingBoard[i][j] = board.Retrive(i, j, 0);
         }
     }
 
 
-    FillTable(board);
+    FillTable(PlayingBoard);
     
 
 
@@ -366,51 +326,52 @@ void MainWindow::on_Lvl1Button_clicked()
     ui.GameWidget->setVisible(true);
     ui.PlanszaWidget->setVisible(true);
     HighlightNumbers(ClickedNumber);
-    wynik_gry.StartTimer();
+    game_score.StartTimer();
 }
 
 void MainWindow::on_Lvl2Button_clicked()
 {
-    Backend.Play(2);
+    board.Play(2);
     Trudnosc = "Średni";
     
 
     for (int i = 0; i < 9; ++i) {
         for (int j = 0; j < 9; ++j) {
-            board[i][j] = Backend.Retrive(i, j, 0);
+            PlayingBoard[i][j] = board.Retrive(i, j, 0);
         }
     }
 
-    FillTable(board);
+    FillTable(PlayingBoard);
     ui.LvlWidget->setVisible(false);
     ui.GameWidget->setVisible(true);
     ui.PlanszaWidget->setVisible(true);
     HighlightNumbers(ClickedNumber);
-    wynik_gry.StartTimer();
+    game_score.StartTimer();
 }
 
 void MainWindow::on_Lvl3Button_clicked()
 {
-    Backend.Play(3);
+    board.Play(3);
     Trudnosc = "Trudny";
 
 
     for (int i = 0; i < 9; ++i) {
         for (int j = 0; j < 9; ++j) {
-            board[i][j] = Backend.Retrive(i, j, 0);
+            PlayingBoard[i][j] = board.Retrive(i, j, 0);
         }
     }
 
-    FillTable(board);
+    FillTable(PlayingBoard);
     ui.LvlWidget->setVisible(false);
     ui.GameWidget->setVisible(true);
     ui.PlanszaWidget->setVisible(true);
     HighlightNumbers(ClickedNumber);
-    wynik_gry.StartTimer();
+    game_score.StartTimer();
 }
 
 
-/*----------------------Panel zmiany nazwy----------------------*/
+
+/*---------------------- Przyciski panelu zmiany nazwy ----------------------*/
 void MainWindow::on_UstawNazweBtn_clicked() {
 
     QString QNazwaUzytkownika = ui.WpiszNazweLine->text();
@@ -448,9 +409,10 @@ void MainWindow::on_NieZmieniajNazwyBtn_clicked() {
 };
 
 
-/*-----------------------Panel gry w sudoku-----------------------*/
+
+/*----------------------- Przyciski panelu gry w sudoku -----------------------*/
 void MainWindow::on_PodpowiedzButton_clicked() {
-    wynik_gry.AddMinus(40);
+    game_score.AddMinus(20);
 
     srand(time(NULL));
 
@@ -459,16 +421,16 @@ void MainWindow::on_PodpowiedzButton_clicked() {
 
     while(true) {
 
-        if (board[randX][randY] == 0) {
-            int number = Backend.Retrive(randX, randY, 1);
+        if (PlayingBoard[randX][randY] == 0) {
+            int number = board.Retrive(randX, randY, 1);
 
             RevertColour();
 
             BoardButtons[randX][randY]->setText(QString::number(number));
             BoardButtons[randX][randY]->setStyleSheet("background-color: #a9add1;");
             AddToCounter(number);
-            Backend.Insert(randX, randY, number);
-            board[randX][randY] = number;
+            board.Insert(randX, randY, number);
+            PlayingBoard[randX][randY] = number;
             break;
         }
         
@@ -495,7 +457,8 @@ void MainWindow::on_PorzucGreButton_clicked()
 
 
 
-/*-------------------Panel rozwiązywania sudoku-------------------*/
+
+/*------------------- Przyciski panelu rozwiązywania sudoku -------------------*/
 void MainWindow::on_WyjdzWypelnij_clicked() 
 {
     ui.WypelnijWidget->setVisible(false);
@@ -506,17 +469,17 @@ void MainWindow::on_WyjdzWypelnij_clicked()
 
 void MainWindow::on_RozwiazSudoku_clicked() 
 {
-    bool CzyRozwiazane = Backend.SolveInput();
+    bool CzyRozwiazane = board.SolveInput();
 
     if (CzyRozwiazane == true) 
     {
         for (int i = 0; i < 9; ++i) {
             for (int j = 0; j < 9; ++j) {
-                board[i][j] = Backend.Retrive(i, j, 0);
+                PlayingBoard[i][j] = board.Retrive(i, j, 0);
             }
         }
 
-        FillTable(board);
+        FillTable(PlayingBoard);
     }
     else 
     {
@@ -527,11 +490,11 @@ void MainWindow::on_RozwiazSudoku_clicked()
 void MainWindow::on_WyczyscSudoku_clicked() 
 {
     ClearTable();
-    FillTable(board);
+    FillTable(PlayingBoard);
 }
 
 
-/*-------------------------Panel wyników-------------------------*/
+/*------------------------- Przyciski panelu wyników -------------------------*/
 void MainWindow::on_WyjdzWynikiButton_clicked() {
     
     ui.TabelaWynWidget->setVisible(false);
@@ -540,7 +503,8 @@ void MainWindow::on_WyjdzWynikiButton_clicked() {
 
 
 /*--------------------Panel przycisków planszy--------------------*/
-/* Wybór numeru do wypełnienia */
+
+/*--- Wybór numeru do wypełnienia pola ---*/
 void MainWindow::on_nr1Btn_clicked() { ClickedNumber = 1; RevertColour(); HighlightNumbers(1);}
 void MainWindow::on_nr2Btn_clicked() { ClickedNumber = 2; RevertColour(); HighlightNumbers(2);}
 void MainWindow::on_nr3Btn_clicked() { ClickedNumber = 3; RevertColour(); HighlightNumbers(3);}
@@ -552,7 +516,7 @@ void MainWindow::on_nr8Btn_clicked() { ClickedNumber = 8; RevertColour(); Highli
 void MainWindow::on_nr9Btn_clicked() { ClickedNumber = 9; RevertColour(); HighlightNumbers(9);}
 
 
-/* Przyciski z planszy */
+/*--- Przyciski z planszy ---*/
 void MainWindow::on_Button11_clicked() { 
      OnButtonPress(1, 1, ClickedNumber);
 }

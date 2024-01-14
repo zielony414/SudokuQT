@@ -4,26 +4,26 @@
 #include <QString>
 #include <string>
 
-class WynikGry : public QObject {
+class GameScore : public QObject {
     Q_OBJECT
 
 public:
-    explicit WynikGry(QObject* parent = nullptr);
+    explicit GameScore(QObject* parent = nullptr);
     void StartTimer();
     void StopTimer();
     void AddPoints(int Board[9][9], int x, int y);
     void AddMinus(double points);
     void ClearData();
-    int GetScore() const;
+    int GetScore();
     
 
 private:
-    QTimer* timer;
+    QTimer* Timer;
     int Sec;
     int Min;
     int NrOfMistakes = 0;
-    double score;
-    std::string czas;
+    double Score;
+    std::string Czas;
 
 signals:
     void aktualizujCzasGry(std::string czas);

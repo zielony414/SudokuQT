@@ -8,11 +8,11 @@
 #include <algorithm>
 #include <iostream>
 
-class Wyniki
+class Scores
 {
 public:
-    bool ExportScore(const std::string& NazwaUzytkownika, int Wynik, const std::string& Trudnosc);
-    const std::vector < std::string > ImportScore();
+    bool ExportScore(std::string& NazwaUzytkownika, int Wynik, std::string& Trudnosc);
+    std::vector < std::string > ImportScore();
 
 private:
     struct PlayerScore {
@@ -26,8 +26,8 @@ private:
     std::vector<PlayerScore> Scoreboard;
     std::vector<std::string> ScoreboardConverted;
     const std::string nazwaPliku = "WynikiSudoku.txt";
-    PlayerScore parsujWiersz(const std::string& wiersz);
-    void wczytajDaneZPliku(const std::string& nazwaPliku);
+    PlayerScore parsujWiersz(std::string& wiersz);
+    void wczytajDaneZPliku(std::string nazwaPliku);
 };
 
 

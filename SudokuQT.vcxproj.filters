@@ -43,10 +43,10 @@
     <ClCompile Include="Board.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="WynikGry.cpp">
+    <ClCompile Include="GameScore.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Wyniki.cpp">
+    <ClCompile Include="Scores.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -54,12 +54,12 @@
     <ClInclude Include="Board.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Wyniki.h">
+    <ClInclude Include="Scores.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="WynikGry.h">
+    <QtMoc Include="GameScore.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

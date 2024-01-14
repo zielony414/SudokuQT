@@ -1,6 +1,7 @@
-﻿#include "Wyniki.h"
+﻿#include "Scores.h"
 
-bool Wyniki::ExportScore(const std::string& NazwaUzytkownika, int Wynik, const std::string& Trudnosc)
+
+bool Scores::ExportScore(std::string& NazwaUzytkownika, int Wynik, std::string& Trudnosc)
 {
     std::time_t czas = std::time(nullptr);
     std::tm* dataCzas = std::localtime(&czas);
@@ -29,13 +30,15 @@ bool Wyniki::ExportScore(const std::string& NazwaUzytkownika, int Wynik, const s
     }
 }
 
-const std::vector<std::string> Wyniki::ImportScore()
+
+std::vector<std::string> Scores::ImportScore()
 {
     wczytajDaneZPliku(nazwaPliku);
     return ScoreboardConverted;
 }
 
-void Wyniki::wczytajDaneZPliku(const std::string& nazwaPliku) {
+
+void Scores::wczytajDaneZPliku(std::string nazwaPliku) {
 
     if (Scoreboard.size() != 0) {
         Scoreboard.clear();
@@ -63,7 +66,8 @@ void Wyniki::wczytajDaneZPliku(const std::string& nazwaPliku) {
         });
 }
 
-Wyniki::PlayerScore Wyniki::parsujWiersz(const std::string& wiersz) {
+
+Scores::PlayerScore Scores::parsujWiersz(std::string& wiersz) {
     PlayerScore PlayerData;
     std::istringstream linia(wiersz);
 
@@ -75,7 +79,8 @@ Wyniki::PlayerScore Wyniki::parsujWiersz(const std::string& wiersz) {
     return PlayerData;
 }
 
-void Wyniki::convertToStr()
+
+void Scores::convertToStr()
 {
     for (const PlayerScore& rekord : Scoreboard) {
         std::ostringstream ss;

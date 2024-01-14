@@ -3,8 +3,8 @@
 #include <QtWidgets/QMainWindow>
 #include "ui_MainWindow.h"
 #include "Board.h"
-#include "WynikGry.h"
-#include "Wyniki.h"
+#include "GameScore.h"
+#include "Scores.h"
 #include <vector>
 #include <iostream>
 #include <string>
@@ -14,7 +14,7 @@
 
 
 
-class WynikGry;
+class GameScore;
 
 class MainWindow : public QMainWindow
 {
@@ -22,14 +22,13 @@ class MainWindow : public QMainWindow
 
 public:
     MainWindow(QWidget* parent = nullptr);
-    ~MainWindow();
 
 private:
     Ui::MainWindowClass ui;
 
-    WynikGry wynik_gry;
-    back Backend;
-    Wyniki wyniki;
+    GameScore game_score;
+    Board board;
+    Scores scores;
 
     std::string NazwaUzytkownika;
     std::string Trudnosc;
@@ -40,17 +39,43 @@ private:
     int ClickedBoardNumber = 0;
     QVector<QVector<QPushButton*>> BoardButtons;
     QVector<QRadioButton*> NumberButtons;
-    int board[9][9] = {0};
+    int PlayingBoard[9][9] = {0};
     bool CreatingSudoku = false;
 
 
-    const char* StylNieaktywnych;
-    const char* StylAktywnych;
+    const char* StylNieaktywnych = 
+        "QRadioButton{display: inline-block;"
+        "background-color: #b1b1b1;"
+        "font-size: 18px;"
+        "border: 2px solid #444;"
+        "border-radius: 4px;"
+        "padding: 8px 20px;}"
+        "QRadioButton::indicator{"
+        "opacity : 0;"
+        "position: fixed;"
+        "width : 0;}";
+
+    const char* StylAktywnych =
+        "QRadioButton{display: inline-block;"
+        "background-color: #ddd;"
+        "padding:10px 20px;"
+        "font-size:18px;"
+        "border: 2px solid #444;"
+        "border-radius:4px;}"
+        "QRadioButton:hover{"
+        "background-color:#dfd;}"
+        "QRadioButton::indicator{"
+        "opacity:0;"
+        "position: fixed;"
+        "width:0;}"
+        "QRadioButton::pressed{"
+        "border:2px dashed #444;}"
+        "QRadioButton::checked{"
+        "background-color: #bfb;"
+        "border-color: #4c4;}";
 
     void ClearTable();
     void AddToCounter(int number);
-    void InitializeBoardButtons();
-    void InitializeNumberButtons();
     void RevertColour();
     void HighlightTable(int x, int y, int num);
     void HighlightNumbers(int num);
