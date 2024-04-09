@@ -4,15 +4,13 @@
 #include "ui_MainWindow.h"
 #include "Board.h"
 #include "GameScore.h"
-#include "Scores.h"
+#include "MySQL.h"
 #include <vector>
 #include <iostream>
 #include <string>
 #include <QVector>
 #include <QPushButton>
 #include <QObject>
-
-
 
 class GameScore;
 
@@ -28,10 +26,10 @@ private:
 
     GameScore game_score;
     Board board;
-    Scores scores;
+    MySQL mysql;
 
     std::string NazwaUzytkownika;
-    std::string Trudnosc;
+    int Trudnosc;
     std::string Data;
 
     int ClickedNumber = 1;
@@ -74,6 +72,7 @@ private:
         "background-color: #bfb;"
         "border-color: #4c4;}";
 
+    std::string ViewResults(ResultSet* res);
     void ClearTable();
     void AddToCounter(int number);
     void RevertColour();
@@ -111,14 +110,18 @@ private slots:
     void on_nr8Btn_clicked();
     void on_nr9Btn_clicked();
 
-    void on_JakoGoscBtn_clicked();
-    void on_NieZmieniajNazwyBtn_clicked();
-    void on_UstawNazweBtn_clicked();
+    void on_ZarejestrujBtn_clicked();
+    void on_NieZmieniajKontaBtn_clicked();
+    void on_ZalogujBtn_clicked();
 
     void on_RozwiazSudoku_clicked(); 
     void on_WyjdzWypelnij_clicked();
     void on_WyczyscSudoku_clicked();
 
+    void on_LatwySortButton_clicked();
+    void on_SredniSortButton_clicked();
+    void on_TrudnySortButton_clicked();
+    void on_WszystkieSortButton_clicked();
     void on_WyjdzWynikiButton_clicked();
 
     void on_Button11_clicked();
@@ -212,3 +215,4 @@ private slots:
     void on_Button99_clicked();
    
 };
+

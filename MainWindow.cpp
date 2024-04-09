@@ -20,7 +20,7 @@ MainWindow::MainWindow(QWidget* parent)
     ui.UzytkownikLabel->setVisible(false);
     ui.WypelnijWidget->setVisible(false);
     ui.plainTextEdit->setVisible(false);
-    ui.NieZmieniajNazwyBtn->setVisible(false);
+    ui.NieZmieniajKontaBtn->setVisible(false);
  
 
     // Zapełnienie tablicy z przyciskami z planszy
@@ -44,6 +44,7 @@ MainWindow::MainWindow(QWidget* parent)
         // Dodaj wektor reprezentujący rzęd do wektora reprezentującego całą tablicę
         BoardButtons.push_back(rowButtons);
     }
+
 }
 
 void MainWindow::aktualizujCzasGry(std::string czas) 
@@ -161,7 +162,49 @@ void MainWindow::RevertColour() {
     }
 }
 
+std::string ParseResults(ResultSet* res) {
+    int i = 1;
+    
 
+    string AllScores = "<table style='text-align: center; border: 1px solid black;' align='center'> <tr> <th>Pozycja:     </th> <th>Konto:     </th> <th>Wynik:     </th> <th>Poziom trudności:     </th> <th>Data:     </th> </tr>";
+
+    //Wypisanie wyników
+
+    string login;
+    int score = 0;
+    int difficulty_level;
+    string date;
+    string lvl;
+
+    while (res->next()) {
+        // Pobierz wartości kolumn po nazwach lub indeksach
+        login = res->getString("login");
+        score = res->getInt("Score");
+        difficulty_level = res->getInt("Difficulty_level");
+        date = res->getString("Date");
+
+        switch (difficulty_level) {
+        case 1:
+            lvl = "Latwy";
+            break;
+        case 2:
+            lvl = "Sredni";
+            break;
+        case 3:
+            lvl = "Trudny";
+            break;
+        default:
+            lvl = "Level err";
+        }
+
+        // Wyświetl pobrane dane
+        AllScores.append("<tr> <td>" + to_string(i) + "</td> <td>" + login + "</td> <td>" + to_string(score) + "</td> <td>" + lvl + "</td> <td>" + date + "</td> </tr>");
+        i++;
+    }
+    AllScores.append("</table>");
+
+    return AllScores;
+}
 
 /*-------------Funkcje działające na przyciskach-------------*/
 void MainWindow::AddToCounter(int number) {
@@ -245,10 +288,7 @@ void MainWindow::EndGame()
     ui.WiadomoscGraLbl->setText("Gratulacje! Rozwiązałeś sudoku");
     ui.PodpowiedzButton->setEnabled(false);
 
-    if (NazwaUzytkownika != "")
-    {
-        scores.ExportScore(NazwaUzytkownika, game_score.GetScore(), Trudnosc);
-    }
+    mysql.export_score(NazwaUzytkownika, Trudnosc, game_score.GetScore());
 }
 
 
@@ -281,22 +321,21 @@ void MainWindow::on_StworzButton_clicked()
 
 void MainWindow::on_UzytkownikButton_clicked()
 {
-    ui.WiadomoscUzytkownik->setText("Jako gość twoje wyniki nie będą zapisane!");
+    ui.WiadomoscUzytkownik->setText("");
     ui.MenuWidget->setVisible(false);
-    ui.NieZmieniajNazwyBtn->setVisible(true);
+    ui.NieZmieniajKontaBtn->setVisible(true);
     ui.UzytkownikWidget->setVisible(true);
 };
 
 void MainWindow::on_WynikiButton_clicked()
 {
     ui.WynikiText->clear();
-    std::vector Scoreboard = scores.ImportScore();
-    ui.WynikiText->setAlignment(Qt::AlignLeft);
-    ui.WynikiText->append("<p>\n</p>");
+    int i = 1;
+    ResultSet* res = mysql.return_score(4);
+    string AllScores = ParseResults(res);
 
-    for (size_t i = 0; i < Scoreboard.size(); ++i) {
-        ui.WynikiText->append("<p align='center'>" + QString::number(i+1) + "\t" + QString::fromStdString(Scoreboard[i]) + "</p>");
-    }
+    ui.WynikiText->setAlignment(Qt::AlignCenter);
+    ui.WynikiText->append(QString::fromUtf8(AllScores));
 
     ui.MenuWidget->setVisible(false);
     ui.TabelaWynWidget->setVisible(true);
@@ -308,8 +347,7 @@ void MainWindow::on_WynikiButton_clicked()
 void MainWindow::on_Lvl1Button_clicked()
 {
     board.Play(1);
-    Trudnosc = "Łatwy";
-
+    Trudnosc = 1;
 
     for (int i = 0; i < 9; ++i) {
         for (int j = 0; j < 9; ++j) {
@@ -317,10 +355,7 @@ void MainWindow::on_Lvl1Button_clicked()
         }
     }
 
-
     FillTable(PlayingBoard);
-    
-
 
     ui.LvlWidget->setVisible(false);
     ui.GameWidget->setVisible(true);
@@ -332,9 +367,8 @@ void MainWindow::on_Lvl1Button_clicked()
 void MainWindow::on_Lvl2Button_clicked()
 {
     board.Play(2);
-    Trudnosc = "Średni";
+    Trudnosc = 2;
     
-
     for (int i = 0; i < 9; ++i) {
         for (int j = 0; j < 9; ++j) {
             PlayingBoard[i][j] = board.Retrive(i, j, 0);
@@ -352,7 +386,7 @@ void MainWindow::on_Lvl2Button_clicked()
 void MainWindow::on_Lvl3Button_clicked()
 {
     board.Play(3);
-    Trudnosc = "Trudny";
+    Trudnosc = 3;
 
 
     for (int i = 0; i < 9; ++i) {
@@ -372,20 +406,33 @@ void MainWindow::on_Lvl3Button_clicked()
 
 
 /*---------------------- Przyciski panelu zmiany nazwy ----------------------*/
-void MainWindow::on_UstawNazweBtn_clicked() {
+void MainWindow::on_ZalogujBtn_clicked() {    
+
+    string HasloUzytkownika;
+    string newLogin;
 
     QString QNazwaUzytkownika = ui.WpiszNazweLine->text();
-    NazwaUzytkownika = QNazwaUzytkownika.toStdString();
+    QString QHasloUzytkownika = ui.WpiszHasloLine->text();
+
     
-    if (NazwaUzytkownika.empty()) {
+
+    newLogin = QNazwaUzytkownika.toUtf8();
+    HasloUzytkownika = QHasloUzytkownika.toUtf8();
+
+    //newLogin = Trim(newLogin);
+    //HasloUzytkownika = Trim(newLogin);
+
+
+    if (newLogin.empty()) {
         ui.WiadomoscUzytkownik->setText("Nazwa nie została wprowadzona!");
     }
-    else if (NazwaUzytkownika == "Gość") {
-        ui.WiadomoscUzytkownik->setText("Nie możesz nazwać użytkownika \"Gość\"!");
+    else if (!mysql.verify_account(newLogin, HasloUzytkownika)) {
+        ui.WiadomoscUzytkownik->setText("Błędne hasło!");
     }
     else {
-        ui.WiadomoscUzytkownik->setText("Jako gość twoje wyniki nie będą zapisane!");
-        ui.UzytkownikLabel->setText(QString::fromStdString("Uzytkownik: ") + QNazwaUzytkownika);
+        NazwaUzytkownika = newLogin;
+        ui.WiadomoscUzytkownik->setText("");
+        ui.UzytkownikLabel->setText(QString::fromUtf8("Uzytkownik: ") + QNazwaUzytkownika);
 
         ui.UzytkownikWidget->setVisible(false);
         ui.MenuWidget->setVisible(true);
@@ -393,16 +440,36 @@ void MainWindow::on_UstawNazweBtn_clicked() {
     }
 };
 
-void MainWindow::on_JakoGoscBtn_clicked() {
-    ui.WiadomoscUzytkownik->setText("Jako gość twoje wyniki nie będą zapisane!");
-    ui.UzytkownikLabel->setText("Uzytkownik: Gość");
+void MainWindow::on_ZarejestrujBtn_clicked() {
 
-    ui.UzytkownikWidget->setVisible(false);
-    ui.MenuWidget->setVisible(true);
-    ui.UzytkownikLabel->setVisible(true);
+    string newLogin;
+    string newPassword;
+
+    QString QNazwaUzytkownika = ui.WpiszNazweLine->text();
+    QString QHasloUzytkownika = ui.WpiszHasloLine->text();
+
+    
+    newLogin = QNazwaUzytkownika.toUtf8();
+    newPassword = QNazwaUzytkownika.toUtf8();
+
+    //newLogin = Trim(newLogin);
+    //newPassword = Trim(newLogin);
+
+    if (mysql.is_in_database(newLogin)) {
+        ui.WiadomoscUzytkownik->setText("Konto o takiej nazwie już istnieje!");
+    }
+    else {
+        mysql.add_account(newLogin, newPassword);
+        ui.UzytkownikLabel->setText(QString::fromUtf8("Uzytkownik: ") + QNazwaUzytkownika);
+
+        ui.UzytkownikWidget->setVisible(false);
+        ui.MenuWidget->setVisible(true);
+        ui.UzytkownikLabel->setVisible(true);
+    }
+    
 }
 
-void MainWindow::on_NieZmieniajNazwyBtn_clicked() {
+void MainWindow::on_NieZmieniajKontaBtn_clicked() {
     ui.UzytkownikWidget->setVisible(false);
     ui.MenuWidget->setVisible(true);
     ui.UzytkownikLabel->setVisible(true);
@@ -475,11 +542,12 @@ void MainWindow::on_RozwiazSudoku_clicked()
     {
         for (int i = 0; i < 9; ++i) {
             for (int j = 0; j < 9; ++j) {
-                PlayingBoard[i][j] = board.Retrive(i, j, 0);
+                PlayingBoard[i][j] = board.PlayBoard[i][j];
             }
         }
 
         FillTable(PlayingBoard);
+        ui.WynikWypelnieniaLbl->setText("Sudoku zostało rozwiązane.");
     }
     else 
     {
@@ -494,7 +562,45 @@ void MainWindow::on_WyczyscSudoku_clicked()
 }
 
 
+
 /*------------------------- Przyciski panelu wyników -------------------------*/
+
+void MainWindow::on_LatwySortButton_clicked()
+{
+    ResultSet* res = mysql.return_score(1);
+    string AllScores = ParseResults(res);
+    ui.WynikiText->clear();
+    ui.WynikiText->setAlignment(Qt::AlignCenter);
+    ui.WynikiText->append(QString::fromUtf8(AllScores));
+}
+
+void MainWindow::on_SredniSortButton_clicked()
+{
+    ResultSet* res = mysql.return_score(2);
+    string AllScores = ParseResults(res);
+    ui.WynikiText->clear();
+    ui.WynikiText->setAlignment(Qt::AlignCenter);
+    ui.WynikiText->append(QString::fromUtf8(AllScores));
+}
+
+void MainWindow::on_TrudnySortButton_clicked()
+{
+    ResultSet* res = mysql.return_score(3);
+    string AllScores = ParseResults(res);
+    ui.WynikiText->clear();
+    ui.WynikiText->setAlignment(Qt::AlignCenter);
+    ui.WynikiText->append(QString::fromUtf8(AllScores));
+}
+
+void MainWindow::on_WszystkieSortButton_clicked()
+{
+    ResultSet* res = mysql.return_score(4);
+    string AllScores = ParseResults(res);
+    ui.WynikiText->clear();
+    ui.WynikiText->setAlignment(Qt::AlignCenter);
+    ui.WynikiText->append(QString::fromUtf8(AllScores));
+}
+
 void MainWindow::on_WyjdzWynikiButton_clicked() {
     
     ui.TabelaWynWidget->setVisible(false);

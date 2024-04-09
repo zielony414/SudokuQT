@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
+
 using namespace std;
 
 
@@ -18,13 +19,14 @@ public:
 	void Play(int poziomTrud);
 	bool SolveInput();
 
-
-private:
 	int PlayBoard[9][9] = { 0 };
 	int DoneBoard[9][9] = { 0 };
+
+private:
 	int Liczby[9] = { 9 };
 
 	bool FindUnassignedLocation(int& row, int& col);
 	bool SudokuSolver(int Table[9][9]);
 	void DrawNumber(int count);
+	
 };
