@@ -1,0 +1,18 @@
+﻿  Reading Qt configuration (D:/Qt/6.6.1/msvc2019_64/bin/qmake)
+  uic MainWindow.ui
+  rcc MainWindow.qrc
+  moc MainWindow.h
+  moc GameScore.h
+  GameScore.cpp
+  MySQL.cpp
+  Scores.cpp
+  Board.cpp
+  MainWindow.cpp
+  main.cpp
+  qrc_MainWindow.cpp
+  moc_MainWindow.cpp
+  moc_GameScore.cpp
+GameScore.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/OPT:ICF' specification
+  SudokuQT.vcxproj -> C:\Users\MichauZ\Desktop\studia\Semestr 4\Programowanie w C++\Projekt\SudokuQT\x64\Release\SudokuQT.exe
+  windeployqt: "D:/Qt/6.6.1/msvc2019_64/bin\windeployqt.exe" --list target --dir "C:\Users\MichauZ\Desktop\studia\Semestr 4\Programowanie w C++\Projekt\SudokuQT\x64\Release\\" "C:\Users\MichauZ\Desktop\studia\Semestr 4\Programowanie w C++\Projekt\SudokuQT\x64\Release\SudokuQT.exe"
+EXEC : warning : Cannot find Visual Studio installation directory, VCINSTALLDIR is not set.
